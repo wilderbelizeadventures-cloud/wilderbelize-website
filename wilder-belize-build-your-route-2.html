@@ -1,0 +1,647 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Build Your Route — Wilder Belize Adventures</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,700;1,9..144,500&family=Work+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --jungle-950:#0F1F17;
+    --jungle-800:#16302A;
+    --jungle-700:#1E4137;
+    --jungle-600:#2C5A48;
+    --river-500:#3C7A6B;
+    --river-300:#7FAE9E;
+    --sand-50:#FBF6EA;
+    --sand-100:#F3E9D2;
+    --sand-200:#E9DAB8;
+    --clay-600:#BE4B29;
+    --clay-700:#9C3A20;
+    --gold-400:#D4A94A;
+    --ink:#132018;
+    --radius:14px;
+    --shadow-soft: 0 8px 24px rgba(15,31,23,0.14);
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    margin:0;
+    background:var(--sand-50);
+    color:var(--ink);
+    font-family:'Work Sans', sans-serif;
+    -webkit-font-smoothing:antialiased;
+  }
+  h1,h2,h3,.display{
+    font-family:'Fraunces', serif;
+    font-weight:600;
+    letter-spacing:-0.01em;
+    margin:0;
+  }
+  .mono{
+    font-family:'IBM Plex Mono', monospace;
+    letter-spacing:0.02em;
+  }
+  a{color:inherit;}
+  img{max-width:100%;display:block;}
+  button{font-family:inherit;cursor:pointer;}
+
+  /* ---------- topbar ---------- */
+  .topbar{
+    position:sticky; top:0; z-index:40;
+    display:flex; align-items:center; justify-content:space-between;
+    padding:14px clamp(18px,4vw,48px);
+    background:rgba(251,246,234,0.92);
+    backdrop-filter:blur(8px);
+    border-bottom:1px solid var(--sand-200);
+  }
+  .brand{display:flex; align-items:center; gap:10px;}
+  .brand-mark{
+    width:34px;height:34px;border-radius:50%;
+    background:var(--jungle-700);
+    display:flex;align-items:center;justify-content:center;
+    color:var(--sand-100); font-family:'Fraunces',serif; font-weight:700; font-size:15px;
+  }
+  .brand-name{font-family:'Fraunces',serif; font-weight:600; font-size:16.5px; line-height:1.1;}
+  .brand-sub{font-size:10.5px; letter-spacing:0.14em; text-transform:uppercase; color:var(--river-500); font-family:'IBM Plex Mono',monospace;}
+  .route-pill{
+    display:flex; align-items:center; gap:10px;
+    background:var(--jungle-950); color:var(--sand-50);
+    padding:9px 16px; border-radius:999px; border:none;
+    font-size:13.5px; font-weight:600;
+  }
+  .route-pill .count{
+    background:var(--gold-400); color:var(--jungle-950);
+    width:20px;height:20px;border-radius:50%;
+    display:flex;align-items:center;justify-content:center;
+    font-size:11px; font-family:'IBM Plex Mono',monospace;
+  }
+
+  /* ---------- hero ---------- */
+  .hero{
+    position:relative;
+    background:
+      radial-gradient(ellipse 120% 90% at 15% -10%, rgba(212,169,74,0.20), transparent 55%),
+      linear-gradient(180deg, var(--jungle-950) 0%, var(--jungle-800) 62%, var(--jungle-700) 100%);
+    color:var(--sand-50);
+    padding:clamp(56px,9vw,96px) clamp(18px,4vw,48px) 70px;
+    overflow:hidden;
+  }
+  .hero-topo{
+    position:absolute; inset:0; opacity:0.16; pointer-events:none;
+    background-image:
+      repeating-radial-gradient(circle at 78% 22%, transparent 0 26px, rgba(127,174,158,0.55) 26px 27px, transparent 27px 52px);
+  }
+  .hero-inner{position:relative; max-width:900px;}
+  .eyebrow{
+    font-family:'IBM Plex Mono',monospace; font-size:12px; letter-spacing:0.18em; text-transform:uppercase;
+    color:var(--gold-400); margin-bottom:18px; display:flex; align-items:center; gap:10px;
+  }
+  .eyebrow::before{content:"";width:26px;height:1px;background:var(--gold-400);display:inline-block;}
+  .hero h1{
+    font-size:clamp(38px,6vw,66px); line-height:1.03; color:var(--sand-50);
+  }
+  .hero h1 em{font-style:italic; font-weight:500; color:var(--river-300);}
+  .hero p{
+    font-size:clamp(15.5px,1.6vw,18px); line-height:1.6; max-width:520px;
+    color:rgba(251,246,234,0.82); margin-top:22px;
+  }
+  .hero-cta{display:flex; gap:14px; margin-top:34px; flex-wrap:wrap;}
+  .btn-primary{
+    background:var(--clay-600); color:var(--sand-50); border:none;
+    padding:14px 26px; border-radius:999px; font-weight:600; font-size:14.5px;
+    display:inline-flex; align-items:center; gap:8px;
+    box-shadow:0 10px 24px rgba(190,75,41,0.35);
+    transition:transform .15s ease, box-shadow .15s ease;
+  }
+  .btn-primary:hover{transform:translateY(-2px); box-shadow:0 14px 28px rgba(190,75,41,0.45);}
+  .btn-ghost{
+    background:transparent; color:var(--sand-50); border:1px solid rgba(251,246,234,0.35);
+    padding:14px 24px; border-radius:999px; font-weight:600; font-size:14.5px;
+  }
+  .hero-stats{
+    display:flex; gap:clamp(20px,4vw,46px); margin-top:52px; flex-wrap:wrap;
+    border-top:1px solid rgba(251,246,234,0.16); padding-top:24px;
+  }
+  .hero-stat b{display:block; font-family:'Fraunces',serif; font-size:26px; color:var(--gold-400);}
+  .hero-stat span{font-size:12px; color:rgba(251,246,234,0.65); font-family:'IBM Plex Mono',monospace; letter-spacing:0.04em;}
+
+  /* ---------- layout ---------- */
+  .layout{
+    max-width:1360px; margin:0 auto;
+    display:grid; grid-template-columns:1fr 350px;
+    gap:0; align-items:start;
+  }
+  .main-col{padding:56px clamp(18px,4vw,48px) 40px; min-width:0;}
+  .section-head{margin-bottom:26px; max-width:640px;}
+  .section-head .tag{
+    font-family:'IBM Plex Mono',monospace; font-size:11.5px; letter-spacing:0.14em; text-transform:uppercase;
+    color:var(--clay-600); margin-bottom:8px; display:block;
+  }
+  .section-head h2{font-size:clamp(24px,3vw,32px); color:var(--jungle-950);}
+  .section-head p{color:#5B6B60; font-size:14.5px; margin-top:8px; line-height:1.55;}
+  .category{margin-bottom:52px;}
+
+  .card-grid{
+    display:grid; grid-template-columns:repeat(auto-fill,minmax(258px,1fr)); gap:16px;
+  }
+  .tour-card{
+    background:var(--sand-100); border-radius:var(--radius); padding:18px 18px 16px;
+    border:1px solid var(--sand-200);
+    display:flex; flex-direction:column; gap:12px;
+    transition:border-color .15s ease, transform .15s ease;
+    position:relative;
+  }
+  .tour-card:hover{transform:translateY(-3px); border-color:var(--river-500);}
+  .tour-card.added{border-color:var(--clay-600); background:#FCEFE7;}
+  .tour-icon{
+    width:42px;height:42px;border-radius:10px; background:var(--jungle-700);
+    display:flex;align-items:center;justify-content:center; color:var(--gold-400);
+  }
+  .tour-icon svg{width:22px;height:22px;}
+  .tour-meta{display:flex; justify-content:space-between; align-items:flex-start; gap:8px;}
+  .tour-name{font-family:'Fraunces',serif; font-weight:600; font-size:16.5px; line-height:1.22; color:var(--jungle-950);}
+  .tour-desc{font-size:13px; color:#5B6B60; line-height:1.5; flex-grow:1;}
+  .tour-tags{display:flex; gap:6px; flex-wrap:wrap;}
+  .badge{
+    font-family:'IBM Plex Mono',monospace; font-size:10px; letter-spacing:0.03em;
+    padding:3px 8px; border-radius:999px; background:var(--river-500); color:var(--sand-50);
+    text-transform:uppercase;
+  }
+  .badge.alt{background:var(--jungle-700);}
+  .tour-foot{display:flex; align-items:center; justify-content:flex-end; margin-top:2px;}
+  .add-btn{
+    width:36px;height:36px; border-radius:50%; border:1.5px solid var(--jungle-700);
+    background:transparent; color:var(--jungle-700); font-size:19px; line-height:1;
+    display:flex;align-items:center;justify-content:center;
+    transition:all .15s ease;
+  }
+  .add-btn:hover{background:var(--jungle-700); color:var(--sand-50);}
+  .tour-card.added .add-btn{background:var(--clay-600); border-color:var(--clay-600); color:var(--sand-50);}
+
+  /* ---------- sidebar / route panel ---------- */
+  .route-panel{
+    position:sticky; top:70px;
+    align-self:start;
+    margin:56px 24px 40px 0;
+    background:var(--jungle-950); color:var(--sand-50);
+    border-radius:18px; padding:26px 22px 22px;
+    max-height:calc(100vh - 100px);
+    display:flex; flex-direction:column;
+  }
+  .route-panel h3{font-size:19px; color:var(--sand-50); display:flex; align-items:center; gap:8px;}
+  .route-panel .sub{font-size:11.5px; color:var(--river-300); font-family:'IBM Plex Mono',monospace; margin-top:4px; letter-spacing:0.03em;}
+  .trail{margin-top:20px; overflow-y:auto; flex-grow:1; padding-right:4px;}
+  .trail-empty{
+    font-size:13px; color:rgba(251,246,234,0.55); line-height:1.6; padding:18px 0;
+    border-top:1px dashed rgba(251,246,234,0.2);
+  }
+  .stop{
+    position:relative; padding-left:26px; padding-bottom:18px;
+  }
+  .stop::before{
+    content:""; position:absolute; left:7px; top:22px; bottom:0; width:1px;
+    background:repeating-linear-gradient(to bottom, rgba(212,169,74,0.55) 0 4px, transparent 4px 8px);
+  }
+  .stop:last-child::before{display:none;}
+  .stop-num{
+    position:absolute; left:0; top:0; width:16px;height:16px; border-radius:50%;
+    background:var(--gold-400); color:var(--jungle-950); font-size:9.5px; font-weight:700;
+    display:flex;align-items:center;justify-content:center; font-family:'IBM Plex Mono',monospace;
+  }
+  .stop-name{font-size:13.5px; font-weight:600; line-height:1.3;}
+  .stop-row{display:flex; justify-content:space-between; align-items:flex-start; gap:6px;}
+  .stop-remove{
+    background:none;border:none;color:rgba(251,246,234,0.4); font-size:11px; margin-top:4px;
+    font-family:'IBM Plex Mono',monospace; letter-spacing:0.03em; padding:0;
+  }
+  .stop-remove:hover{color:var(--clay-600);}
+  .route-total{
+    border-top:1px solid rgba(251,246,234,0.16); margin-top:8px; padding-top:16px;
+  }
+  .route-total-row{display:flex; justify-content:space-between; align-items:baseline; margin-bottom:4px;}
+  .route-total-row.grand{margin-top:8px;}
+  .route-total-row span:first-child{font-size:12.5px; color:rgba(251,246,234,0.65);}
+  .route-total-row.grand span:first-child{font-size:14px; color:var(--sand-50); font-weight:600;}
+  .route-total-row .val{font-family:'IBM Plex Mono',monospace; font-size:13px;}
+  .route-total-row.grand .val{font-size:22px; color:var(--gold-400); font-weight:600;}
+  .travelers-row{
+    display:flex; align-items:center; justify-content:space-between;
+    margin-top:14px; padding-top:14px; border-top:1px solid rgba(251,246,234,0.12);
+    font-size:12.5px; color:rgba(251,246,234,0.75);
+  }
+  .stepper{display:flex; align-items:center; gap:10px;}
+  .stepper button{
+    width:24px;height:24px; border-radius:6px; border:1px solid rgba(251,246,234,0.3);
+    background:transparent; color:var(--sand-50); font-size:14px; line-height:1;
+  }
+  .stepper span{font-family:'IBM Plex Mono',monospace; min-width:14px; text-align:center;}
+  .checkout-btn{
+    width:100%; margin-top:18px; background:var(--clay-600); color:var(--sand-50);
+    border:none; border-radius:999px; padding:14px; font-weight:600; font-size:14px;
+  }
+  .checkout-btn:disabled{background:rgba(251,246,234,0.14); color:rgba(251,246,234,0.4); cursor:not-allowed;}
+  .checkout-btn:not(:disabled):hover{background:var(--clay-700);}
+  .panel-note{font-size:10.5px; color:rgba(251,246,234,0.4); margin-top:10px; line-height:1.5; text-align:center;}
+
+  /* mobile bottom bar */
+  .mobile-bar{
+    display:none; position:fixed; bottom:0; left:0; right:0; z-index:50;
+    background:var(--jungle-950); color:var(--sand-50);
+    padding:12px 18px; align-items:center; justify-content:space-between;
+    box-shadow:0 -8px 24px rgba(0,0,0,0.25);
+  }
+  .mobile-bar .val{font-family:'IBM Plex Mono',monospace; font-size:18px; color:var(--gold-400);}
+  .mobile-bar .lbl{font-size:11px; color:rgba(251,246,234,0.6);}
+  .mobile-open-btn{
+    background:var(--clay-600); color:var(--sand-50); border:none; padding:11px 22px;
+    border-radius:999px; font-weight:600; font-size:13.5px;
+  }
+
+  /* ---------- checkout modal ---------- */
+  .modal-overlay{
+    display:none; position:fixed; inset:0; background:rgba(15,31,23,0.68); z-index:100;
+    align-items:center; justify-content:center; padding:18px;
+  }
+  .modal{
+    background:var(--sand-50); border-radius:18px; max-width:480px; width:100%;
+    max-height:88vh; overflow-y:auto; padding:30px 28px;
+  }
+  .modal h3{font-size:22px; color:var(--jungle-950);}
+  .modal p.lead{font-size:13.5px; color:#5B6B60; margin-top:8px; line-height:1.55;}
+  .field{margin-top:16px;}
+  .field label{font-size:12px; font-weight:600; color:var(--jungle-800); display:block; margin-bottom:6px; font-family:'IBM Plex Mono',monospace; letter-spacing:0.02em;}
+  .field input, .field textarea{
+    width:100%; border:1.5px solid var(--sand-200); background:#fff; border-radius:10px;
+    padding:11px 13px; font-family:'Work Sans',sans-serif; font-size:14px; color:var(--ink);
+  }
+  .field input:focus, .field textarea:focus{outline:none; border-color:var(--river-500);}
+  .field-row{display:flex; gap:12px;}
+  .field-row .field{flex:1;}
+  .modal-summary{
+    background:var(--sand-100); border-radius:12px; padding:14px 16px; margin-top:18px; font-size:12.5px;
+  }
+  .modal-summary-row{display:flex; justify-content:space-between; padding:4px 0; color:#4A5850;}
+  .modal-summary-row.total{font-weight:700; color:var(--jungle-950); border-top:1px solid var(--sand-200); margin-top:4px; padding-top:8px;}
+  .modal-actions{display:flex; gap:10px; margin-top:22px;}
+  .btn-whatsapp{
+    flex:1; background:#25D366; color:#fff; border:none; border-radius:999px; padding:13px; font-weight:600; font-size:13.5px;
+    display:flex; align-items:center; justify-content:center; gap:7px;
+  }
+  .btn-email{
+    flex:1; background:transparent; border:1.5px solid var(--jungle-700); color:var(--jungle-800);
+    border-radius:999px; padding:13px; font-weight:600; font-size:13.5px;
+  }
+  .modal-close{
+    position:absolute; top:14px; right:16px; background:none; border:none; font-size:20px; color:#8A968D;
+  }
+  .modal{position:relative;}
+
+  footer{
+    background:var(--jungle-950); color:rgba(251,246,234,0.55); text-align:center;
+    padding:30px 20px 100px; font-size:12px; font-family:'IBM Plex Mono',monospace;
+  }
+  footer strong{color:var(--sand-50);}
+
+  @media (max-width:980px){
+    .layout{grid-template-columns:1fr;}
+    .route-panel{display:none;}
+    .mobile-bar{display:flex;}
+    .main-col{padding-bottom:110px;}
+  }
+</style>
+</head>
+<body>
+
+  <div class="topbar">
+    <div class="brand">
+      <div class="brand-mark">W</div>
+      <div>
+        <div class="brand-name">Wilder Belize Adventures</div>
+        <div class="brand-sub">Placencia Village</div>
+      </div>
+    </div>
+    <button class="route-pill" onclick="openModalIfPossible()">
+      <span>Your Route</span>
+      <span class="count" id="topCount">0</span>
+    </button>
+  </div>
+
+  <section class="hero">
+    <div class="hero-topo"></div>
+    <div class="hero-inner">
+      <div class="eyebrow">Custom Trip Builder</div>
+      <h1>Plot your own <em>route</em><br>through wild Belize.</h1>
+      <p>Jungle rivers, sunken caves, Maya ruins, and the reef beyond — pick the stops that call to you and we'll stitch them into one seamless day, or a week. Every route below is yours to build.</p>
+      <div class="hero-cta">
+        <a href="#builder" class="btn-primary">Start building your route ↓</a>
+        <a href="#grid-culture" class="btn-ghost">See the full list ↓</a>
+      </div>
+      <div class="hero-stats">
+        <div class="hero-stat"><b>23</b><span>Trail &amp; reef excursions</span></div>
+        <div class="hero-stat"><b>100%</b><span>Locally guided, Placencia-based</span></div>
+        <div class="hero-stat"><b>1</b><span>Route, built entirely by you</span></div>
+      </div>
+    </div>
+  </section>
+
+  <div class="layout">
+    <div class="main-col" id="builder">
+
+      <div class="category">
+        <div class="section-head">
+          <span class="tag">Chapter 01</span>
+          <h2>Ruins, caves &amp; the underworld</h2>
+          <p>Maya history and limestone caverns carved by rivers that still run through them today.</p>
+        </div>
+        <div class="card-grid" id="grid-ruins"></div>
+      </div>
+
+      <div class="category">
+        <div class="section-head">
+          <span class="tag">Chapter 02</span>
+          <h2>Waterfalls &amp; adrenaline</h2>
+          <p>Zip through canopy, rappel beside falling water, or ride an ATV deep into the jungle interior.</p>
+        </div>
+        <div class="card-grid" id="grid-falls"></div>
+      </div>
+
+      <div class="category">
+        <div class="section-head">
+          <span class="tag">Chapter 03</span>
+          <h2>Wildlife &amp; wild places</h2>
+          <p>Jaguar country, riverine wildlife, and the birds that make southern Belize a watcher's dream.</p>
+        </div>
+        <div class="card-grid" id="grid-wildlife"></div>
+      </div>
+
+      <div class="category">
+        <div class="section-head">
+          <span class="tag">Chapter 04</span>
+          <h2>Culture &amp; craft</h2>
+          <p>Hands-on traditions passed down for generations, made in small batches, the old way.</p>
+        </div>
+        <div class="card-grid" id="grid-culture"></div>
+      </div>
+
+    </div>
+
+    <!-- Desktop sticky route panel -->
+    <aside class="route-panel">
+      <h3>🧭 Your Route</h3>
+      <div class="sub" id="subCount">NO STOPS ADDED YET</div>
+      <div class="trail" id="trail">
+        <div class="trail-empty">Tap the <strong>+</strong> on any excursion to start plotting your route through Belize. Your itinerary and running total build here as you go.</div>
+      </div>
+      <div class="route-total">
+        <div class="travelers-row">
+          <span>Travelers</span>
+          <div class="stepper">
+            <button onclick="changeTravelers(-1)">−</button>
+            <span id="travelersCount">3</span>
+            <button onclick="changeTravelers(1)">+</button>
+          </div>
+        </div>
+      </div>
+      <button class="checkout-btn" id="checkoutBtn" disabled onclick="openModal()">Reserve this route →</button>
+      <div class="panel-note">Build your own route by mixing and matching excursions. We'll confirm availability and details once you submit your request.</div>
+    </aside>
+  </div>
+
+  <!-- Mobile bottom bar -->
+  <div class="mobile-bar">
+    <div>
+      <div class="lbl mono" id="mobileCountLbl">0 stops selected</div>
+    </div>
+    <button class="mobile-open-btn" onclick="openModalIfPossible()">Review route</button>
+  </div>
+
+  <!-- Checkout modal -->
+  <div class="modal-overlay" id="modalOverlay">
+    <div class="modal">
+      <button class="modal-close" onclick="closeModal()">✕</button>
+      <h3>Reserve your route</h3>
+      <p class="lead">Send us your details — we'll confirm availability and dates, then follow up with a secure payment link.</p>
+
+      <div class="modal-summary" id="modalSummary"></div>
+
+      <div class="field-row">
+        <div class="field">
+          <label>Full name</label>
+          <input type="text" id="fName" placeholder="Jane Traveler">
+        </div>
+        <div class="field">
+          <label>Travelers</label>
+          <input type="text" id="fTravelers" readonly>
+        </div>
+      </div>
+      <div class="field">
+        <label>Email</label>
+        <input type="email" id="fEmail" placeholder="jane@email.com">
+      </div>
+      <div class="field">
+        <label>WhatsApp / phone</label>
+        <input type="text" id="fPhone" placeholder="+1 555 000 0000">
+      </div>
+      <div class="field">
+        <label>Preferred date(s)</label>
+        <input type="text" id="fDate" placeholder="e.g. March 14–16, 2027">
+      </div>
+      <div class="field">
+        <label>Notes</label>
+        <textarea id="fNotes" rows="2" placeholder="Pickup location, dietary needs, anything else"></textarea>
+      </div>
+
+      <div class="modal-actions">
+        <button class="btn-whatsapp" onclick="sendWhatsApp()">Send via WhatsApp</button>
+        <button class="btn-email" onclick="sendEmail()">Send via Email</button>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    <strong>Wilder Belize Adventures</strong> · Placencia Village, Belize · +501 671-8828 · wilderbelizeadventures@gmail.com
+  </footer>
+
+<script>
+// ---------------- data ----------------
+const ICONS = {
+  ruins: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 20h16M6 20V10l6-5 6 5v10M9 20v-6h6v6"/></svg>',
+  cave: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 20c1-6 5-14 9-14s8 8 9 14"/><circle cx="12" cy="13" r="2"/></svg>',
+  fall: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M7 3c0 4-2 5-2 9s2 5 2 9M12 3c0 4-2 5-2 9s2 5 2 9M17 3c0 4-2 5-2 9s2 5 2 9"/></svg>',
+  zip: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 17L21 5M14 5h7v7"/></svg>',
+  atv: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="6" cy="18" r="2.4"/><circle cx="18" cy="18" r="2.4"/><path d="M6 18h5l2-6h5M11 12L9 6h4"/></svg>',
+  paw: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="8" cy="7" r="1.6"/><circle cx="13" cy="5.5" r="1.6"/><circle cx="17.5" cy="8.5" r="1.6"/><path d="M12 12c-3.5 0-6 2-6 4.5S8 20 12 20s6-1 6-3.5S15.5 12 12 12z"/></svg>',
+  bird: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 14c4-8 12-9 16-6-2 0-3 1-3 2 3 0 4 2 4 3-2-1-3 0-4 1 0 3-4 6-9 6 2-1 3-3 3-5-3 2-5 1-7-1z"/></svg>',
+  river: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 8c3-3 5 1 8-1s5 4 8 1M3 14c3-3 5 1 8-1s5 4 8 1M3 20c3-3 5 1 8-1s5 4 8 1"/></svg>',
+  cacao: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><ellipse cx="12" cy="12" rx="6" ry="9"/><path d="M12 3v18M8 9c1 0 2 1 4 1s3-1 4-1M8 15c1 0 2 1 4 1s3-1 4-1"/></svg>',
+  horse: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M5 20l1-6 2-6c1-2 3-3 5-3l3 2-1 2 3 1v4l-2 1v5M9 20v-4"/></svg>',
+  compass: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="9"/><path d="M15 9l-2 6-4-1 2-6z"/></svg>'
+};
+
+const TOURS = [
+  // Ruins & caves
+  {id:"xunantunich", name:"Xunantunich Mayan Ruins", cat:"ruins", icon:"ruins", desc:"Cross the river hand-crank ferry, then climb El Castillo for views over three countries.", tags:["Full Day"]},
+  {id:"blue-hole", name:"Inland Blue Hole", cat:"ruins", icon:"cave", desc:"A cenote-fed swimming hole in the jungle, ringed by limestone and cave passages.", tags:["Half Day"]},
+  {id:"cave-tubing", name:"Cave Tubing", cat:"ruins", icon:"cave", desc:"Float an underground river by inner tube through chambers lit only by headlamp.", tags:["Half Day"]},
+  {id:"cave-kayaking", name:"Cave Kayaking", cat:"ruins", icon:"river", desc:"Paddle into cave mouths where jungle river meets ancient stone.", tags:["Half Day"]},
+  {id:"atm", name:"ATM Cave Exploration", cat:"ruins", icon:"cave", desc:"Wade, swim, and climb to a chamber of untouched Maya ceremonial artifacts.", tags:["Full Day"]},
+  {id:"nim-li-punit", name:"Nim Li Punit Mayan Ruins", cat:"ruins", icon:"ruins", desc:"A quieter ceremonial site in the Toledo foothills, home to the tallest stelae in Belize.", tags:["Half Day"]},
+
+  // Waterfalls & adrenaline
+  {id:"antelope-hike", name:"Antelope Trail Hike + Waterfall Swim", cat:"falls", icon:"fall", desc:"A rainforest trail ending in a cool swim beneath the falls.", tags:["Half Day"]},
+  {id:"bocawina-zip", name:"Bocawina Zipline", cat:"falls", icon:"zip", desc:"Belize's longest canopy run, high above the Bocawina rainforest floor.", tags:["Half Day"]},
+  {id:"mayan-sky-zip", name:"Mayan Sky Zipline", cat:"falls", icon:"zip", desc:"A sweeping ridge-line zip circuit through the jungle canopy.", tags:["Half Day"]},
+  {id:"atv-hidden", name:"ATV to Hidden Waterfall Adventure", cat:"falls", icon:"atv", desc:"Muddy backroads by ATV to a falls most visitors never find.", tags:["Half Day"]},
+  {id:"atv-mayan-king", name:"ATV to Mayan King Waterfall", cat:"falls", icon:"atv", desc:"Off-road through jungle terrain to a multi-tier cascade.", tags:["Half Day"]},
+  {id:"mayan-king-falls", name:"Mayan King Waterfall", cat:"falls", icon:"fall", desc:"A shorter trail in for a swim at one of the south's prettiest falls.", tags:["Half Day"]},
+  {id:"horse-mayan-king", name:"Horseback Riding", cat:"falls", icon:"horse", desc:"Ride through farmland and forest trail, ending with a waterfall swim.", tags:["Half Day"]},
+  {id:"river-tubing", name:"Jungle River Tubing", cat:"falls", icon:"river", desc:"Drift a gentle jungle river by inner tube, the current doing all the work.", tags:["Half Day"]},
+  {id:"south-waterfall", name:"Toledo Waterfall Swim", cat:"falls", icon:"fall", desc:"A cool jungle swim at a falls tucked into the southern foothills near Nim Li Punit.", tags:["Half Day"]},
+
+  // Wildlife
+  {id:"jaguar", name:"Jaguar Reserve", cat:"wildlife", icon:"paw", desc:"Cockscomb Basin, the world's first jaguar preserve — trails, rivers, and the chance of tracks.", tags:["Full Day"]},
+  {id:"monkey-river", name:"Monkey River Marine & Terrestrial Wildlife Tour", cat:"wildlife", icon:"river", desc:"Boat past manatees and howler monkeys en route to a jungle village lunch.", tags:["Full Day"]},
+  {id:"cockscomb-birding", name:"Cockscomb/Bocawina Birdwatching", cat:"wildlife", icon:"bird", desc:"Early trail walk through prime habitat for toucans, trogons, and more.", tags:["Half Day"]},
+  {id:"macaw-birding", name:"Scarlet Macaw Birdwatching", cat:"wildlife", icon:"bird", desc:"Seasonal riverside viewing of one of the region's rarest, boldest birds.", tags:["Half Day"]},
+  {id:"outback-horse", name:"Horseback Riding", cat:"wildlife", icon:"horse", desc:"An easy ride through farmland and forest edge, good for first-timers.", tags:["Half Day"]},
+
+  // Culture
+  {id:"choc-making", name:"Chei'l Mayan Chocolate Making", cat:"culture", icon:"cacao", desc:"Roast, grind, and mold cacao by hand the way it's been done for generations.", tags:["Half Day"]},
+  {id:"spice-farm", name:"Toledo Spice Farm Tour", cat:"culture", icon:"cacao", desc:"Walk a working spice farm and taste vanilla, allspice, and turmeric straight from the source.", tags:["Half Day"]},
+  {id:"ixcacao-choc", name:"Ixcacao Chocolate Making", cat:"culture", icon:"cacao", desc:"A full day on a Toledo cacao farm — harvest, ferment, roast, and grind the bean into your own chocolate.", tags:["Full Day"]},
+];
+
+let route = [];
+let travelers = 3;
+
+function renderGrid(containerId, items){
+  const el = document.getElementById(containerId);
+  el.innerHTML = items.map(t => cardHTML(t)).join('');
+}
+
+function cardHTML(t){
+  const added = route.find(r => r.id === t.id);
+  return `
+  <div class="tour-card ${added?'added':''}" id="card-${t.id}">
+    <div class="tour-icon">${ICONS[t.icon] || ICONS.compass}</div>
+    <div class="tour-meta">
+      <div class="tour-name">${t.name}</div>
+    </div>
+    <div class="tour-desc">${t.desc}</div>
+    <div class="tour-tags">${t.tags.map(tag=>`<span class="badge">${tag}</span>`).join('')}</div>
+    <div class="tour-foot">
+      <button class="add-btn" onclick="toggleTour('${t.id}')">${added ? '✓' : '+'}</button>
+    </div>
+  </div>`;
+}
+
+function findTour(id){
+  return TOURS.find(t=>t.id===id);
+}
+
+function toggleTour(id){
+  const idx = route.findIndex(r => r.id === id);
+  if(idx >= 0){
+    route.splice(idx,1);
+  } else {
+    const t = findTour(id);
+    route.push(t);
+  }
+  renderAll();
+}
+
+function removeStop(id){
+  route = route.filter(r => r.id !== id);
+  renderAll();
+}
+
+function changeTravelers(delta){
+  travelers = Math.max(3, Math.min(20, travelers + delta));
+  renderAll();
+}
+
+function renderAll(){
+  renderGrid('grid-ruins', TOURS.filter(t=>t.cat==='ruins'));
+  renderGrid('grid-falls', TOURS.filter(t=>t.cat==='falls'));
+  renderGrid('grid-wildlife', TOURS.filter(t=>t.cat==='wildlife'));
+  renderGrid('grid-culture', TOURS.filter(t=>t.cat==='culture'));
+
+  // trail
+  const trailEl = document.getElementById('trail');
+  if(route.length === 0){
+    trailEl.innerHTML = `<div class="trail-empty">Tap the <strong>+</strong> on any excursion to start plotting your route through Belize. Your itinerary and running total build here as you go.</div>`;
+  } else {
+    trailEl.innerHTML = route.map((t,i)=>`
+      <div class="stop">
+        <div class="stop-num">${i+1}</div>
+        <div class="stop-row">
+          <div class="stop-name">${t.name}</div>
+        </div>
+        <button class="stop-remove" onclick="removeStop('${t.id}')">remove</button>
+      </div>
+    `).join('');
+  }
+
+  document.getElementById('topCount').textContent = route.length;
+  document.getElementById('subCount').textContent = route.length === 0 ? 'NO STOPS ADDED YET' : `${route.length} STOP${route.length>1?'S':''} · ${travelers} TRAVELER${travelers>1?'S':''}`;
+  document.getElementById('mobileCountLbl').textContent = `${route.length} stop${route.length!==1?'s':''} selected`;
+  document.getElementById('travelersCount').textContent = travelers;
+  document.getElementById('checkoutBtn').disabled = route.length === 0;
+}
+
+// ---------------- modal ----------------
+function openModalIfPossible(){
+  if(route.length === 0){
+    document.getElementById('builder').scrollIntoView({behavior:'smooth'});
+    return;
+  }
+  openModal();
+}
+
+function openModal(){
+  document.getElementById('fTravelers').value = travelers;
+  const summaryEl = document.getElementById('modalSummary');
+  summaryEl.innerHTML = route.map(t => `
+    <div class="modal-summary-row"><span>${t.name}</span></div>
+  `).join('');
+  document.getElementById('modalOverlay').style.display = 'flex';
+}
+
+function closeModal(){
+  document.getElementById('modalOverlay').style.display = 'none';
+}
+
+function buildSummaryText(){
+  const name = document.getElementById('fName').value || '(name not provided)';
+  const email = document.getElementById('fEmail').value || '(email not provided)';
+  const phone = document.getElementById('fPhone').value || '(phone not provided)';
+  const date = document.getElementById('fDate').value || '(dates not provided)';
+  const notes = document.getElementById('fNotes').value || '—';
+  const lines = route.map((t,i)=>`${i+1}. ${t.name}`).join('%0A');
+  const text =
+`Booking request — Wilder Belize Adventures%0A%0A`+
+`Name: ${name}%0AEmail: ${email}%0APhone: ${phone}%0ATravelers: ${travelers}%0APreferred dates: ${date}%0A%0ARoute:%0A${lines}%0A%0ANotes: ${notes}`;
+  return text;
+}
+
+function sendWhatsApp(){
+  const text = buildSummaryText();
+  window.open(`https://wa.me/5016718828?text=${text}`, '_blank');
+}
+
+function sendEmail(){
+  const text = buildSummaryText().replace(/%0A/g,'%0D%0A');
+  window.location.href = `mailto:info@wilderbelizeadventures.com?subject=Booking%20request%20-%20custom%20route&body=${text}`;
+}
+
+document.getElementById('modalOverlay').addEventListener('click', (e)=>{
+  if(e.target.id === 'modalOverlay') closeModal();
+});
+
+renderAll();
+</script>
+</body>
+</html>
