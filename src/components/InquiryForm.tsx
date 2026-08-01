@@ -51,6 +51,7 @@ export function InquiryForm({
   const [company, setCompany] = useState(""); // honeypot — real users leave this empty
   const [state, setState] = useState<"idle" | "loading" | "done" | "error">("idle");
   const [error, setError] = useState("");
+  const [debugInfo, setDebugInfo] = useState<any>(null);
   const [termsOpen, setTermsOpen] = useState(false);
   const [termsAccepted, setTermsAccepted] = useState(false);
   const [today, setToday] = useState("");
@@ -173,32 +174,36 @@ async function startPayment() {
     const data = await res.json();
 
     if (!res.ok || !data.success) {
+      console.error("Belize Bank Diagnostic Response:", data);
+      setError(
+        `${data.message || "Payment initialization failed."} (HTTP Status: ${data.httpStatus || res.status}, Code: ${data.errorCode ?? "N/A"})`
+      );
+      setDebugInfo(data);
       throw new Error(data.message || "Payment initialization failed.");
     }
 
     sessionStorage.setItem(
       "pendingBooking",
       JSON.stringify({
-        name,
-        email,
-        phone,
-        tour: selectedTour.name,
+        tourName: selectedTour.name,
         date,
         guests,
         hotel,
-        message,
-        amount: totalAmount,
+        name,
+        email,
+        phone,
+        totalAmount,
         orderId: data.orderId,
-        termsAccepted: true,
+        orderNumber: data.orderNumber,
       })
     );
 
     window.location.href = data.paymentUrl;
   } catch (err) {
     setState("error");
-    setError(
-      err instanceof Error ? err.message : "Something went wrong."
-    );
+    if (!error) {
+      setError(err instanceof Error ? err.message : "Something went wrong.");
+    }
   }
 }
   if (state === "done") {
