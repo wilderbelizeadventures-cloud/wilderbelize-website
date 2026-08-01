@@ -103,11 +103,11 @@ export default function SuccessPage() {
             user_name: bookingData.name,
             user_email: bookingData.email,
             phone: bookingData.phone || "Not provided",
-            tour_name: bookingData.tour,
+            tour_name: bookingData.tour || (bookingData as any).tourName || "Wilder Belize Adventure",
             date: bookingData.date,
             guests: bookingData.guests,
             pickup_location: bookingData.hotel,
-            total_amount: `$${bookingData.amount}`,
+            total_amount: `$${bookingData.amount || (bookingData as any).totalAmount || 0}`,
             order_id: refNumber,
             notes: bookingData.message || "None",
             reply_to: bookingData.email,
@@ -209,8 +209,8 @@ export default function SuccessPage() {
                     <span className="font-bold text-ink">{booking.name}</span>
                   </div>
                   <div className="flex items-center justify-between border-b border-ink/5 pb-2">
-                    <span className="text-ink-soft">Tour Adventure</span>
-                    <span className="font-bold text-jungle-800">{booking.tour}</span>
+                    <span className="text-ink-soft">Reservation / Tour</span>
+                    <span className="font-bold text-jungle-800">{booking.tour || (booking as any).tourName || "Wilder Belize Adventure"}</span>
                   </div>
                   <div className="flex items-center justify-between border-b border-ink/5 pb-2">
                     <span className="text-ink-soft flex items-center gap-1.5">
@@ -237,7 +237,7 @@ export default function SuccessPage() {
                       <CreditCard className="h-4 w-4 text-jungle-600" /> Total Paid
                     </span>
                     <span className="font-extrabold text-jungle-700 text-lg">
-                      ${booking.amount} USD
+                      ${booking.amount || (booking as any).totalAmount || 0} USD
                     </span>
                   </div>
                 </div>

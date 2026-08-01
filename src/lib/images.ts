@@ -2,7 +2,7 @@
 export const HERO_IMAGES = {
   waterfall: "/images/heroes/hero-waterfall.jpg",
   canopy: "/images/zip_waterfall/w2.JPG",
-  boating:"/images/7-DAY-2.avif",
+  boating: "/images/multi-day-cave.jpg",
   coast: "/images/monkey_river/turtle.jpg",
   cave: "/images/heroes/hero-cave.jpg",
 } as const;
