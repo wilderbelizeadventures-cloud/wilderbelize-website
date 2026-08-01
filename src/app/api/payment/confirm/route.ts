@@ -13,7 +13,7 @@ export async function POST(req: NextRequest) {
 
     const bblBaseUrl = process.env.BBL_BASE_URL || "https://gateway.belizebank.com/payment/rest";
     const bblUsername = process.env.BBL_USERNAME || "Wilder_Belize_Adventures-api";
-    const bblPassword = process.env.BBL_PASSWORD || "WilderBelize2026!";
+    const bblPassword = process.env.BBL_PASSWORD || "WilderB3lize2027!";
     const reqOrigin = req.headers.get("origin") || req.nextUrl.origin;
     const baseUrl = (process.env.NEXT_PUBLIC_BASE_URL && !process.env.NEXT_PUBLIC_BASE_URL.includes("localhost"))
       ? process.env.NEXT_PUBLIC_BASE_URL

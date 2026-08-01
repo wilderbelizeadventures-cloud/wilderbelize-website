@@ -10,7 +10,7 @@ export async function POST(req: NextRequest) {
     // 1. Verify environment variables loading
     const bblBaseUrl = process.env.BBL_BASE_URL || "https://gateway.belizebank.com/payment/rest";
     const bblUsername = process.env.BBL_USERNAME || "Wilder_Belize_Adventures-api";
-    const bblPassword = process.env.BBL_PASSWORD || "WilderBelize2026!";
+    const bblPassword = process.env.BBL_PASSWORD || "WilderB3lize2027!";
     const bblMid = process.env.BBL_MID || "Not set";
     const bblTid = process.env.BBL_TID || "Not set";
 
@@ -77,6 +77,7 @@ export async function POST(req: NextRequest) {
     params.append("description", tourName);
     params.append("returnUrl", `${baseUrl}/payment/success`);
     params.append("orderNumber", orderNumber);
+    params.append("currency", process.env.BBL_CURRENCY || "840");
 
     if (email) {
       params.append("email", email);
