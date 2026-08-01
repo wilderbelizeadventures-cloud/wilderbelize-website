@@ -12,10 +12,14 @@ export async function POST(req: NextRequest) {
     }
 
     const bblBaseUrl = process.env.BBL_BASE_URL || "https://gateway.belizebank.com/payment/rest";
-    const bblUsername = process.env.BBL_USERNAME;
-    const bblPassword = process.env.BBL_PASSWORD;
-    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000";
-    const isLocalhost = baseUrl.includes("localhost") || process.env.NODE_ENV === "development";
+    const bblUsername = process.env.BBL_USERNAME || "Wilder_Belize_Adventures-api";
+    const bblPassword = process.env.BBL_PASSWORD || "WilderBelize2026!";
+    const reqOrigin = req.headers.get("origin") || req.nextUrl.origin;
+    const baseUrl = (process.env.NEXT_PUBLIC_BASE_URL && !process.env.NEXT_PUBLIC_BASE_URL.includes("localhost"))
+      ? process.env.NEXT_PUBLIC_BASE_URL
+      : (reqOrigin || process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000");
+
+    const isLocalhost = process.env.NODE_ENV === "development" || baseUrl.includes("localhost");
 
     if (!bblUsername || !bblPassword) {
       if (isLocalhost) {
@@ -78,8 +82,12 @@ export async function POST(req: NextRequest) {
     });
   } catch (error) {
     console.error("Payment Confirmation API Error:", error);
-    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000";
-    if (baseUrl.includes("localhost")) {
+    const reqOrigin = req.headers.get("origin") || req.nextUrl.origin;
+    const baseUrl = (process.env.NEXT_PUBLIC_BASE_URL && !process.env.NEXT_PUBLIC_BASE_URL.includes("localhost"))
+      ? process.env.NEXT_PUBLIC_BASE_URL
+      : (reqOrigin || process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000");
+
+    if (process.env.NODE_ENV === "development" || baseUrl.includes("localhost")) {
       return NextResponse.json({
         success: true,
         orderStatus: 2,
@@ -88,7 +96,7 @@ export async function POST(req: NextRequest) {
     }
 
     return NextResponse.json(
-      { success: false, message: "Failed to confirm payment status." },
+      { success: false, message: "Failed to confirm payment status with Belize Bank." },
       { status: 500 }
     );
   }

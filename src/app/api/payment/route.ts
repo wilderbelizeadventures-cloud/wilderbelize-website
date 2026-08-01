@@ -19,36 +19,25 @@ export async function POST(req: NextRequest) {
     }
 
     const bblBaseUrl = process.env.BBL_BASE_URL || "https://gateway.belizebank.com/payment/rest";
-    const bblUsername = process.env.BBL_USERNAME;
-    const bblPassword = process.env.BBL_PASSWORD;
+    const bblUsername = process.env.BBL_USERNAME || "Wilder_Belize_Adventures-api";
+    const bblPassword = process.env.BBL_PASSWORD || "WilderBelize2026!";
     const orderNumber = `WILDER-${Date.now()}`;
-    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000";
+    const reqOrigin = req.headers.get("origin") || req.nextUrl.origin;
+    let baseUrl = (process.env.NEXT_PUBLIC_BASE_URL && !process.env.NEXT_PUBLIC_BASE_URL.includes("localhost"))
+      ? process.env.NEXT_PUBLIC_BASE_URL
+      : (reqOrigin || process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000");
 
-    const isLocalhost = baseUrl.includes("localhost") || process.env.NODE_ENV === "development";
-
-    if (!bblUsername || !bblPassword) {
-      if (isLocalhost) {
-        return NextResponse.json({
-          success: true,
-          paymentUrl: `${baseUrl}/payment/success?orderId=${orderNumber}`,
-          orderId: orderNumber,
-          orderNumber,
-          isSimulated: true,
-        });
-      }
-      return NextResponse.json(
-        {
-          success: false,
-          message: "Payment gateway credentials missing.",
-        },
-        { status: 500 }
-      );
+    if (baseUrl.includes(".vercel.app")) {
+      baseUrl = "https://www.wilderbelizeadventures.com";
     }
+
+    const isLocalhost = process.env.NODE_ENV === "development" || baseUrl.includes("localhost");
 
     const params = new URLSearchParams();
     params.append("userName", bblUsername);
     params.append("password", bblPassword);
     params.append("amount", String(Math.round(Number(amount) * 100)));
+    params.append("currency", "840");
     params.append("description", tourName);
     params.append("returnUrl", `${baseUrl}/payment/success`);
     params.append("failUrl", `${baseUrl}/payment/failed`);
@@ -70,10 +59,10 @@ export async function POST(req: NextRequest) {
 
     if (data.errorCode !== undefined && Number(data.errorCode) !== 0) {
       console.error("Belize Bank API Error Response:", data);
-      
-      // If running locally and Belize Bank rejects dynamic home IP with 'Access denied', fallback gracefully to local test mode
+
+      // On localhost, if Belize Bank rejects dynamic local IP with 'Access denied', fallback seamlessly for local dev
       if (isLocalhost) {
-        console.log("Localhost environment detected & BBL IP restriction active: Simulating payment checkout flow for local testing.");
+        console.log("Localhost environment detected & BBL IP restriction active: Redirecting to completion for local testing.");
         return NextResponse.json({
           success: true,
           paymentUrl: `${baseUrl}/payment/success?orderId=${orderNumber}`,
@@ -86,7 +75,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json(
         {
           success: false,
-          message: data.errorMessage || "Belize Bank returned an initialization error.",
+          message: data.errorMessage || `Belize Bank API Error Code ${data.errorCode}.`,
           errorCode: data.errorCode,
         },
         { status: 400 }
@@ -107,7 +96,8 @@ export async function POST(req: NextRequest) {
       return NextResponse.json(
         {
           success: false,
-          message: "Invalid response structure from Belize Bank payment gateway.",
+          message: "Belize Bank payment gateway did not return a valid payment URL.",
+          data,
         },
         { status: 502 }
       );
@@ -121,8 +111,12 @@ export async function POST(req: NextRequest) {
     });
   } catch (error) {
     console.error("Payment API Initialization Exception:", error);
-    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000";
-    if (baseUrl.includes("localhost")) {
+    const reqOrigin = req.headers.get("origin") || req.nextUrl.origin;
+    const baseUrl = (process.env.NEXT_PUBLIC_BASE_URL && !process.env.NEXT_PUBLIC_BASE_URL.includes("localhost"))
+      ? process.env.NEXT_PUBLIC_BASE_URL
+      : (reqOrigin || process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000");
+
+    if (process.env.NODE_ENV === "development" || baseUrl.includes("localhost")) {
       const orderNumber = `WILDER-${Date.now()}`;
       return NextResponse.json({
         success: true,
@@ -136,7 +130,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json(
       {
         success: false,
-        message: "Unable to connect to Belize Bank payment gateway server.",
+        message: error instanceof Error ? error.message : "Unable to connect to Belize Bank payment gateway server.",
       },
       { status: 500 }
     );

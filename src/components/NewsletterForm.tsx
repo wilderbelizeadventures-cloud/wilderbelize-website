@@ -33,18 +33,19 @@ export function NewsletterForm({ dark = false }: { dark?: boolean }) {
   }
 
   return (
-    <form onSubmit={onSubmit} className="flex w-full max-w-md flex-col gap-2 sm:flex-row">
+    <form onSubmit={onSubmit} className="flex w-full max-w-md flex-col gap-2 sm:flex-row" suppressHydrationWarning>
       <input
         type="email"
         required
         value={email}
         onChange={(e) => setEmail(e.target.value)}
         placeholder="you@email.com"
+        suppressHydrationWarning
         className={`min-w-0 flex-1 rounded-full px-5 py-3 text-sm outline-none ring-2 ring-transparent transition focus:ring-coral-400 ${
           dark ? "bg-white/10 text-white placeholder:text-white/50" : "bg-white text-ink placeholder:text-ink-faint"
         }`}
       />
-      <button type="submit" disabled={state === "loading"} className="btn btn-primary shrink-0">
+      <button type="submit" disabled={state === "loading"} suppressHydrationWarning className="btn btn-primary shrink-0">
         {state === "loading" ? <Loader2 className="h-4 w-4 animate-spin" /> : <>Subscribe <ArrowRight className="h-4 w-4" /></>}
       </button>
     </form>

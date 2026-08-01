@@ -53,8 +53,11 @@ export function InquiryForm({
   const [error, setError] = useState("");
   const [termsOpen, setTermsOpen] = useState(false);
   const [termsAccepted, setTermsAccepted] = useState(false);
+  const [today, setToday] = useState("");
 
-  const today = new Date().toISOString().split("T")[0];
+  useEffect(() => {
+    setToday(new Date().toISOString().split("T")[0]);
+  }, []);
   const rowCls = cn("grid gap-4", !compact && "sm:grid-cols-2");
 
   useEffect(() => {
@@ -68,27 +71,22 @@ export function InquiryForm({
   }, [termsOpen]);
 
   function onSubmit(e: React.FormEvent) {
-  e.preventDefault();
+    e.preventDefault();
 
-  // Honeypot check - if company field is filled, it's a bot
-  if (company) {
-    return;
+    // Honeypot check - if company field is filled, it's a bot
+    if (company) {
+      return;
+    }
+
+    // Contact mode - send via EmailJS
+    if (mode === "contact") {
+      void sendContactEmail();
+      return;
+    }
+
+    // Booking mode - start payment directly
+    void startPayment();
   }
-
-  if (mode === "booking") {
-    setTermsAccepted(false);
-    setTermsOpen(true);
-    return;
-  }
-
-  // Contact mode - send via EmailJS
-  if (mode === "contact") {
-    void sendContactEmail();
-    return;
-  }
-
-  void startPayment();
-}
 
 async function sendContactEmail() {
   if (!name || !email || !message) {
@@ -142,12 +140,14 @@ async function startPayment() {
   setError("");
 
   try {
+    const tourIdentifier = lockedTourName || tour;
     const selectedTour =
-      tours.find((t) => t.name === tour) ??
-      tours.find((t) => t.name === lockedTourName);
+      tours.find((t) => t.name === tourIdentifier) ??
+      tours.find((t) => t.slug === tourIdentifier) ??
+      (tourIdentifier ? { name: tourIdentifier, price: 150 } : null);
 
     if (!selectedTour) {
-      throw new Error("Tour not found.");
+      throw new Error("Please choose a tour adventure.");
     }
 
     const totalAmount = selectedTour.price * guests;
@@ -227,28 +227,28 @@ async function startPayment() {
   }
 
   return (
-    <form onSubmit={onSubmit} className={cn("space-y-4", className)}>
+    <form onSubmit={onSubmit} className={cn("space-y-4", className)} suppressHydrationWarning>
       {/* Honeypot — visually hidden, ignored by humans */}
       <div aria-hidden className="absolute -left-[9999px] h-0 w-0 overflow-hidden">
         <label htmlFor="if-company">Company</label>
-        <input id="if-company" tabIndex={-1} autoComplete="off" value={company} onChange={(e) => setCompany(e.target.value)} />
+        <input id="if-company" tabIndex={-1} autoComplete="off" value={company} onChange={(e) => setCompany(e.target.value)} suppressHydrationWarning />
       </div>
 
       <div className={rowCls}>
         <div>
           <label className={labelCls} htmlFor="if-name">Full name</label>
-          <input id="if-name" className={inputCls} value={name} onChange={(e) => setName(e.target.value)} required placeholder="Jane Traveler" />
+          <input id="if-name" className={inputCls} value={name} onChange={(e) => setName(e.target.value)} required placeholder="Jane Traveler" suppressHydrationWarning />
         </div>
         <div>
           <label className={labelCls} htmlFor="if-email">Email</label>
-          <input id="if-email" type="email" className={inputCls} value={email} onChange={(e) => setEmail(e.target.value)} required placeholder="you@email.com" />
+          <input id="if-email" type="email" className={inputCls} value={email} onChange={(e) => setEmail(e.target.value)} required placeholder="you@email.com" suppressHydrationWarning />
         </div>
       </div>
 
       <div className={rowCls}>
         <div>
           <label className={labelCls} htmlFor="if-phone">Phone / WhatsApp <span className="font-medium normal-case text-ink-faint">(optional)</span></label>
-          <input id="if-phone" className={inputCls} value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="+1 555 123 4567" />
+          <input id="if-phone" className={inputCls} value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="+1 555 123 4567" suppressHydrationWarning />
         </div>
         {mode === "contact" ? (
           <div>
@@ -258,7 +258,7 @@ async function startPayment() {
         ) : (
           <div>
             <label className={labelCls} htmlFor="if-date"><CalendarDays className="mr-1 inline h-3.5 w-3.5" /> Preferred date</label>
-            <input id="if-date" type="date" min={today} required={mode === "booking"} className={inputCls} value={date} onChange={(e) => setDate(e.target.value)} />
+            <input id="if-date" type="date" min={today} suppressHydrationWarning required={mode === "booking"} className={inputCls} value={date} onChange={(e) => setDate(e.target.value)} />
           </div>
         )}
       </div>
@@ -334,9 +334,11 @@ async function startPayment() {
         />
       </div>
       {mode === "booking" && (() => {
+  const tourIdentifier = lockedTourName || tour;
   const selectedTour =
-    tours.find((t) => t.name === tour) ??
-    tours.find((t) => t.name === lockedTourName);
+    tours.find((t) => t.name === tourIdentifier) ??
+    tours.find((t) => t.slug === tourIdentifier) ??
+    (tourIdentifier ? { name: tourIdentifier, price: 150 } : null);
 
   const total = (selectedTour?.price ?? 0) * guests;
 

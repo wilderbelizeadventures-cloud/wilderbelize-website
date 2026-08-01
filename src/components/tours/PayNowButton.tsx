@@ -46,6 +46,17 @@ export function PayNowButton({
         throw new Error(data.message || "Unable to start payment.");
       }
 
+      sessionStorage.setItem(
+        "pendingBooking",
+        JSON.stringify({
+          tour: tourName,
+          guests,
+          amount: totalAmount,
+          orderId: data.orderId,
+          termsAccepted: true,
+        })
+      );
+
       window.location.href = data.paymentUrl;
     } catch (err) {
       setError(err instanceof Error ? err.message : "Something went wrong.");

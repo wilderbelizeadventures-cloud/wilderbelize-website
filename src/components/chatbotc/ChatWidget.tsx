@@ -1,19 +1,27 @@
-
-
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { MessageCircle, X } from "lucide-react";
-import ChatWindow  from "./ChatWindow";
+import ChatWindow from "./ChatWindow";
+
 export default function ChatWidget() {
   const [isOpen, setIsOpen] = useState(false);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  if (!mounted) return null;
 
   return (
     <>
       <button
+        type="button"
         onClick={() => setIsOpen((prev) => !prev)}
         className="fixed bottom-6 right-6 z-50 flex h-16 w-16 items-center justify-center rounded-full bg-jungle-700 text-white shadow-xl transition hover:scale-105 hover:bg-jungle-800"
         aria-label="Open chatbot"
+        suppressHydrationWarning
       >
         {isOpen ? <X size={28} /> : <MessageCircle size={28} />}
       </button>
@@ -28,14 +36,13 @@ export default function ChatWidget() {
               </p>
             </div>
 
-            <button onClick={() => setIsOpen(false)}>
+            <button type="button" onClick={() => setIsOpen(false)} aria-label="Close chatbot">
               <X size={20} />
             </button>
           </div>
-            <div className="flex-1 overflow-hidden">
+          <div className="flex-1 overflow-hidden">
             <ChatWindow />
           </div>
-          
         </div>
       )}
     </>
