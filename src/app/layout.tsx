@@ -85,15 +85,22 @@ export default function RootLayout({
     description:
       "Family-run adventure tour operator in Placencia, Belize offering jungle, cave, waterfall, Maya ruin and wildlife tours.",
     url: "https://wilderbelizeadventures.com",
+    image: "https://wilderbelizeadventures.com/images/heroes/hero-coast.jpg",
     telephone: company.phones,
     email: company.emails[0],
+    priceRange: "$$",
     address: {
       "@type": "PostalAddress",
       addressLocality: "Placencia Village",
       addressRegion: "Stann Creek",
       addressCountry: "BZ",
     },
-    areaServed: "Belize",
+    geo: {
+      "@type": "GeoCoordinates",
+      latitude: 16.5142,
+      longitude: -88.3665,
+    },
+    areaServed: ["Placencia", "Stann Creek", "Hopkins", "Belize City", "Belize"],
     sameAs: [company.socials.facebook, company.socials.instagram, company.socials.tripadvisor],
   };
 
