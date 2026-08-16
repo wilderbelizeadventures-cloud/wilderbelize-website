@@ -116,9 +116,9 @@ export default function HomePage() {
                 muted
                 loop
                 playsInline
-                controls
+                poster="/images/heroes/hero-jungle.jpg"
               >
-                <source src="/videos/Wilder Website Cinematic.mp4" type="video/mp4" />
+                <source src="/images/belize-background-web.mp4" type="video/mp4" />
                 Your browser does not support the video tag.
               </video>
             </div>
