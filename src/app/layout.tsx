@@ -105,11 +105,11 @@ export default function RootLayout({
   };
 
   return (
-    <html lang="en" className={`${display.variable} ${body.variable} h-full antialiased`}>
-      <body className="flex min-h-full flex-col">
+    <html lang="en" className={`${display.variable} ${body.variable} h-full antialiased overflow-x-hidden`}>
+      <body className="flex min-h-full flex-col overflow-x-hidden">
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(orgLd) }} />
         <Navbar />
-        <main className="flex-1">{children}</main>
+        <main className="flex-1 overflow-x-hidden">{children}</main>
         <Footer />
         <ChatWidget />
       </body>

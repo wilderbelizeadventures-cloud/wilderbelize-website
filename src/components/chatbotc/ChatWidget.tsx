@@ -27,7 +27,7 @@ export default function ChatWidget() {
       </button>
 
       {isOpen && (
-        <div className="fixed bottom-24 right-6 z-50 flex h-[600px] w-[380px] flex-col overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-2xl">
+        <div className="fixed bottom-24 right-4 sm:right-6 z-50 flex h-[580px] max-h-[80vh] w-[calc(100vw-2rem)] sm:w-[380px] flex-col overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-2xl">
           <div className="flex items-center justify-between bg-jungle-700 px-5 py-4 text-white">
             <div>
               <h2 className="font-semibold">Wilder Assistant</h2>
