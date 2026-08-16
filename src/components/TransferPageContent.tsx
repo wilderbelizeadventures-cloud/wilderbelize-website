@@ -30,7 +30,7 @@ export function TransferPageContent({ siteTransfer }: TransferPageContentProps) 
   return (
     <>
       <VideoHero
-        videoSrc="/images/belize-background-web.mp4"
+        videoSrc="/videos/transfers-hero.mp4"
         poster="/images/heroes/hero-coast.jpg"
         kicker="Door to door"
         title={siteTransfer.title}

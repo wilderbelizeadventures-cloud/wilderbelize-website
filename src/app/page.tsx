@@ -118,7 +118,7 @@ export default function HomePage() {
                 playsInline
                 poster="/images/heroes/hero-jungle.jpg"
               >
-                <source src="/images/belize-background-web.mp4" type="video/mp4" />
+                <source src="/videos/Wilder Website Cinematic.mp4" type="video/mp4" />
                 Your browser does not support the video tag.
               </video>
             </div>

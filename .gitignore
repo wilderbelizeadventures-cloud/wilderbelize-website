@@ -44,6 +44,5 @@ yarn-error.log*
 next-env.d.ts
 
 # large video files
-public/videos/*.mp4
 
 .vercel
