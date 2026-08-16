@@ -182,21 +182,30 @@ async function startPayment() {
       throw new Error(data.message || "Payment initialization failed.");
     }
 
-    sessionStorage.setItem(
-      "pendingBooking",
-      JSON.stringify({
-        tourName: selectedTour.name,
-        date,
-        guests,
-        hotel,
-        name,
-        email,
-        phone,
-        totalAmount,
-        orderId: data.orderId,
-        orderNumber: data.orderNumber,
-      })
-    );
+    const bookingPayload = {
+      tourName: selectedTour.name,
+      date,
+      guests,
+      hotel,
+      name,
+      email,
+      phone,
+      message,
+      totalAmount,
+      orderId: data.orderId,
+      orderNumber: data.orderNumber,
+    };
+
+    sessionStorage.setItem("pendingBooking", JSON.stringify(bookingPayload));
+    
+    // Cookie backup for cross-tab or mobile browser returns
+    try {
+      document.cookie = `pendingBooking_${data.orderId}=${encodeURIComponent(
+        JSON.stringify(bookingPayload)
+      )}; path=/; max-age=86400; SameSite=Lax`;
+    } catch (e) {
+      console.warn("Could not write backup cookie", e);
+    }
 
     window.location.href = data.paymentUrl;
   } catch (err) {

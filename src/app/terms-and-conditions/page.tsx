@@ -4,6 +4,9 @@ import { TermsAndConditions } from "@/components/TermsAndConditions";
 export const metadata: Metadata = {
   title: "Terms & Conditions",
   description: "Booking, cancellation, and liability terms for Wilder Belize Adventures.",
+  alternates: {
+    canonical: "https://wilderbelizeadventures.com/terms-and-conditions",
+  },
 };
 
 export default function TermsAndConditionsPage() {

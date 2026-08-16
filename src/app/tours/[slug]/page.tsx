@@ -24,6 +24,9 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   return {
     title: tour.name,
     description: tour.shortDescription,
+    alternates: {
+      canonical: `https://wilderbelizeadventures.com/tours/${tour.slug}`,
+    },
     openGraph: { title: tour.name, description: tour.shortDescription, images: [tour.image] },
   };
 }

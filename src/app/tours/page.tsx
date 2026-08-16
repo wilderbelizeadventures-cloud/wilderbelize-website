@@ -8,6 +8,9 @@ export const metadata: Metadata = {
   title: "All Tours & Excursions",
   description:
     "Browse all Wilder Belize Adventures tours — ATV jungle rides, cave tubing, waterfalls, zip lining, Maya ruins, wildlife and more. Filter by category, difficulty, interest and price.",
+  alternates: {
+    canonical: "https://wilderbelizeadventures.com/tours",
+  },
 };
 
 export default async function ToursPage({

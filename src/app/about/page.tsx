@@ -12,6 +12,9 @@ import { HERO_IMAGES, MISC_IMAGES, THEMES_IMAGES } from "@/lib/images";
 export const metadata: Metadata = {
   title: "About Us",
   description: site.aboutShort,
+  alternates: {
+    canonical: "https://wilderbelizeadventures.com/about",
+  },
 };
 
 export default function AboutPage() {

@@ -11,6 +11,9 @@ export const metadata: Metadata = {
   title: "Travelers Information",
   description:
     "Everything you need to plan your Belize trip with Wilder Belize Adventures — getting to Placencia, best time to visit, what to pack, health & safety, currency and booking.",
+  alternates: {
+    canonical: "https://wilderbelizeadventures.com/travelers-info",
+  },
 };
 
 const ICONS = [Plane, CalendarDays, Backpack, ShieldCheck, Wallet, CalendarCheck];

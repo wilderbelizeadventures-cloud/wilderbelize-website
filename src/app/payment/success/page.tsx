@@ -34,16 +34,30 @@ export default function SuccessPage() {
     const params = new URLSearchParams(window.location.search);
     const orderId = params.get("orderId");
 
-    // Load saved pending booking from sessionStorage
+    // Load saved pending booking from sessionStorage or cookie fallback
     const storedBookingStr = sessionStorage.getItem("pendingBooking");
     let storedBooking: PendingBooking | null = null;
     if (storedBookingStr) {
       try {
         storedBooking = JSON.parse(storedBookingStr);
-        setBooking(storedBooking);
       } catch (e) {
         console.error("Error parsing pending booking data", e);
       }
+    }
+
+    if (!storedBooking && orderId) {
+      try {
+        const match = document.cookie.match(new RegExp(`pendingBooking_${orderId}=([^;]+)`));
+        if (match) {
+          storedBooking = JSON.parse(decodeURIComponent(match[1]));
+        }
+      } catch (e) {
+        console.error("Error parsing cookie backup", e);
+      }
+    }
+
+    if (storedBooking) {
+      setBooking(storedBooking);
     }
 
     if (!orderId) {
@@ -58,7 +72,7 @@ export default function SuccessPage() {
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({ orderId }),
+          body: JSON.stringify({ orderId, fallbackBooking: storedBooking }),
         });
 
         const data = await response.json();
@@ -67,9 +81,26 @@ export default function SuccessPage() {
           setStatus("success");
           setOrderRef(data.orderNumber || orderId || "");
 
-          // Send confirmation email if booking details exist
-          if (storedBooking && !emailSent) {
-            void sendConfirmationEmail(storedBooking, data.orderNumber || orderId);
+          const resolvedBooking: PendingBooking | null = storedBooking || (data.booking ? {
+            name: data.booking.name,
+            email: data.booking.email,
+            phone: data.booking.phone,
+            tour: data.booking.tourName,
+            date: data.booking.date,
+            guests: data.booking.guests,
+            hotel: data.booking.hotel,
+            message: data.booking.message,
+            amount: data.booking.totalAmount,
+            orderId: data.booking.orderId,
+          } : null);
+
+          if (resolvedBooking) {
+            setBooking(resolvedBooking);
+          }
+
+          // Send client-side confirmation email fallback if needed
+          if (resolvedBooking && !emailSent) {
+            void sendConfirmationEmail(resolvedBooking, data.orderNumber || orderId);
           }
         } else {
           setStatus("failed");
@@ -100,16 +131,42 @@ export default function SuccessPage() {
             to_email: bookingData.email || RECIPIENT_EMAIL,
             from_name: bookingData.name,
             from_email: bookingData.email,
+            name: bookingData.name,
             user_name: bookingData.name,
+            email: bookingData.email,
             user_email: bookingData.email,
             phone: bookingData.phone || "Not provided",
+
+            // Dates (all possible template variable names)
+            date: bookingData.date || "To be scheduled",
+            preferred_dates: bookingData.date || "To be scheduled",
+            preferred_date: bookingData.date || "To be scheduled",
+
+            // Guests / Travelers (all possible template variable names)
+            guests: String(bookingData.guests || 1),
+            travelers: String(bookingData.guests || 1),
+            number_of_guests: String(bookingData.guests || 1),
+
+            // Locations
+            hotel: bookingData.hotel || "Not specified",
+            pickup_location: bookingData.hotel || "Not specified",
+            pickup: bookingData.hotel || "Not specified",
+
+            // Tour / Route / Package details
             tour_name: bookingData.tour || (bookingData as any).tourName || "Wilder Belize Adventure",
-            date: bookingData.date,
-            guests: bookingData.guests,
-            pickup_location: bookingData.hotel,
+            tour: bookingData.tour || (bookingData as any).tourName || "Wilder Belize Adventure",
+            package_name: bookingData.tour || (bookingData as any).tourName || "Wilder Belize Adventure",
+            route_stops: bookingData.tour || (bookingData as any).tourName || "Wilder Belize Adventure",
+
+            // Amounts & References
             total_amount: `$${bookingData.amount || (bookingData as any).totalAmount || 0}`,
+            amount: `$${bookingData.amount || (bookingData as any).totalAmount || 0}`,
             order_id: refNumber,
+            reference_number: refNumber,
+
+            // Notes & Messages
             notes: bookingData.message || "None",
+            message: `Tour/Package: ${bookingData.tour || (bookingData as any).tourName || "Wilder Belize Adventure"}\nDate: ${bookingData.date || "To be scheduled"}\nGuests: ${bookingData.guests || 1}\nPickup: ${bookingData.hotel || "Not specified"}\nNotes: ${bookingData.message || "None"}`,
             reply_to: bookingData.email,
           },
           EMAILJS_PUBLIC_KEY

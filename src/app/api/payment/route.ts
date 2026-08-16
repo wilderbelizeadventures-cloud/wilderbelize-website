@@ -1,11 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
+import { storePendingBooking } from "@/lib/bookingStore";
 
 export async function POST(req: NextRequest) {
   const startTime = Date.now();
   console.log("=== [BBL PAYMENT DEBUG START] ===");
 
   try {
-    const { amount, tourName, email } = await req.json();
+    const body = await req.json();
+    const { amount, tourName, email, name, phone, date, guests, hotel, message } = body;
 
     // 1. Verify environment variables loading
     const bblBaseUrl = process.env.BBL_BASE_URL || "https://gateway.belizebank.com/payment/rest";
@@ -153,6 +155,23 @@ export async function POST(req: NextRequest) {
         },
         { status: 502 }
       );
+    }
+
+    if (data.orderId) {
+      storePendingBooking({
+        orderId: data.orderId,
+        orderNumber,
+        name: name || "Valued Guest",
+        email: email || "",
+        phone: phone || "",
+        tourName: tourName || "Wilder Belize Adventure",
+        date: date || "",
+        guests: Number(guests) || 1,
+        hotel: hotel || "",
+        message: message || "",
+        totalAmount: Number(amount) || 0,
+        createdAt: Date.now(),
+      });
     }
 
     return NextResponse.json({

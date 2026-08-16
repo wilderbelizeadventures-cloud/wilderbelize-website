@@ -4,7 +4,7 @@ import { tours } from "@/data/tours";
 const BASE = "https://wilderbelizeadventures.com";
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const pages = ["", "/tours", "/build-your-route", "/transfers", "/about", "/travelers-info", "/contact"].map((r) => ({
+  const pages = ["", "/tours", "/build-your-route", "/transfers", "/about", "/travelers-info", "/contact", "/terms-and-conditions"].map((r) => ({
     url: `${BASE}${r}`,
     changeFrequency: "weekly" as const,
     priority: r === "" ? 1 : 0.8,

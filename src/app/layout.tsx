@@ -20,6 +20,9 @@ const body = Plus_Jakarta_Sans({
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://wilderbelizeadventures.com"),
+  alternates: {
+    canonical: "https://wilderbelizeadventures.com",
+  },
   title: {
     default: "Wilder Belize Adventures — Tours & Excursions in Placencia, Belize",
     template: "%s · Wilder Belize Adventures",

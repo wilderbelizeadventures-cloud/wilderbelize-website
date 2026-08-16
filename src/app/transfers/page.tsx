@@ -5,6 +5,9 @@ import { TransferPageContent } from "@/components/TransferPageContent";
 export const metadata: Metadata = {
   title: "Private Ground Transfers",
   description: site.transfer.description,
+  alternates: {
+    canonical: "https://wilderbelizeadventures.com/transfers",
+  },
 };
 
 export default function TransfersPage() {
