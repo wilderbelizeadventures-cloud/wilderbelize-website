@@ -125,13 +125,13 @@ export function TransferPageContent({ siteTransfer }: TransferPageContentProps) 
       <section className="section pt-0" id="transfer-booking-section">
         <div className="container-page grid gap-10 lg:grid-cols-2">
           <Reveal>
-            <div className="rounded-3xl bg-jungle-950 p-8 text-white h-full flex flex-col justify-between">
+            <div className="rounded-3xl bg-jungle-950 p-4 sm:p-8 text-white h-full flex flex-col justify-between">
               <div>
                 <TransferSlideshow />
 
                 <h2 className="mt-6 font-display text-2xl font-bold text-white">Travel in Comfort</h2>
 
-                <div className="mt-5 rounded-2xl border border-white/10 bg-white/5 p-5">
+                <div className="mt-5 rounded-2xl border border-white/10 bg-white/5 p-4 sm:p-5">
                   <div className="space-y-2 text-sm text-white/90">
                     <p>
                       <span className="font-semibold text-white">$300 USD:</span> One-way (1–4 Persons)
@@ -170,7 +170,7 @@ export function TransferPageContent({ siteTransfer }: TransferPageContentProps) 
           </Reveal>
 
           <Reveal>
-            <div className="rounded-3xl bg-white p-7 shadow-lift ring-1 ring-ink/5">
+            <div className="rounded-3xl bg-white p-4 sm:p-7 shadow-lift ring-1 ring-ink/5">
               <div className="mb-6">
                 <span className="rounded-full bg-coral-100 px-3 py-1 text-xs font-bold text-coral-700">
                   Instant Booking

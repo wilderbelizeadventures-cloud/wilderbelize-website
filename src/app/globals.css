@@ -224,7 +224,7 @@
     padding: 0.85rem 1.6rem;
     transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.25s, background-color 0.25s, color 0.25s;
     cursor: pointer;
-    white-space: nowrap;
+    max-width: 100%;
   }
   .btn:active { transform: scale(0.97); }
   .btn-primary {

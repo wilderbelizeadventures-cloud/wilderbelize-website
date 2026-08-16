@@ -480,15 +480,15 @@ export function TransferBookingForm({
       <button
         type="submit"
         disabled={state === "loading"}
-        className="btn btn-primary w-full py-3.5 text-base justify-center gap-2 shadow-lg hover:shadow-xl"
+        className="btn btn-primary w-full py-3.5 px-3 text-sm sm:text-base justify-center gap-2 shadow-lg hover:shadow-xl whitespace-normal"
       >
         {state === "loading" ? (
           <Loader2 className="h-5 w-5 animate-spin" />
         ) : (
           <>
-            <CreditCard className="h-5 w-5" />
-            Pay & Book Transfer (${totalPrice} USD)
-            <Check className="h-4 w-4" />
+            <CreditCard className="h-5 w-5 shrink-0" />
+            <span>Pay & Book Transfer (${totalPrice} USD)</span>
+            <Check className="h-4 w-4 shrink-0" />
           </>
         )}
       </button>
