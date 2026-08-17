@@ -12,7 +12,7 @@ export const metadata: Metadata = {
   description:
     "Everything you need to plan your Belize trip with Wilder Belize Adventures — getting to Placencia, best time to visit, what to pack, health & safety, currency and booking.",
   alternates: {
-    canonical: "https://wilderbelizeadventures.com/travelers-info",
+    canonical: "https://www.wilderbelizeadventures.com/travelers-info",
   },
 };
 

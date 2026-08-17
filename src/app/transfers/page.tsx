@@ -6,7 +6,7 @@ export const metadata: Metadata = {
   title: "Private Ground Transfers",
   description: site.transfer.description,
   alternates: {
-    canonical: "https://wilderbelizeadventures.com/transfers",
+    canonical: "https://www.wilderbelizeadventures.com/transfers",
   },
 };
 

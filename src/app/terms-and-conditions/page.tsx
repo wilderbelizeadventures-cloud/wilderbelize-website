@@ -5,7 +5,7 @@ export const metadata: Metadata = {
   title: "Terms & Conditions",
   description: "Booking, cancellation, and liability terms for Wilder Belize Adventures.",
   alternates: {
-    canonical: "https://wilderbelizeadventures.com/terms-and-conditions",
+    canonical: "https://www.wilderbelizeadventures.com/terms-and-conditions",
   },
 };
 

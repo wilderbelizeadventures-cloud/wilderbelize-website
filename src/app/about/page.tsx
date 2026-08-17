@@ -13,7 +13,7 @@ export const metadata: Metadata = {
   title: "About Us",
   description: site.aboutShort,
   alternates: {
-    canonical: "https://wilderbelizeadventures.com/about",
+    canonical: "https://www.wilderbelizeadventures.com/about",
   },
 };
 

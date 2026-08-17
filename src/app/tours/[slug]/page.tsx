@@ -25,7 +25,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
     title: tour.name,
     description: tour.shortDescription,
     alternates: {
-      canonical: `https://wilderbelizeadventures.com/tours/${tour.slug}`,
+      canonical: `https://www.wilderbelizeadventures.com/tours/${tour.slug}`,
     },
     openGraph: { title: tour.name, description: tour.shortDescription, images: [tour.image] },
   };
@@ -46,18 +46,30 @@ export default async function TourDetailPage({ params }: { params: Promise<{ slu
   const related = tours.filter((t) => t.slug !== tour.slug && t.category === tour.category).slice(0, 3);
   const paragraphs = tour.description.split("\n\n");
 
-  const base = "https://wilderbelizeadventures.com";
+  const base = "https://www.wilderbelizeadventures.com";
   const jsonLd = [
     {
       "@context": "https://schema.org",
-      "@type": "TouristTrip",
+      "@type": "Product",
       name: tour.name,
       description: tour.shortDescription,
       image: `${base}${tour.image}`,
-      touristType: tour.bestFor,
-      provider: { "@type": "TravelAgency", name: "Wilder Belize Adventures", areaServed: "Belize" },
-      offers: { "@type": "Offer", price: tour.price, priceCurrency: "USD", availability: "https://schema.org/InStock" },
-      aggregateRating: { "@type": "AggregateRating", ratingValue: tour.rating, reviewCount: tour.reviews },
+      category: tour.category,
+      brand: { "@type": "Brand", name: "Wilder Belize Adventures" },
+      offers: {
+        "@type": "Offer",
+        price: tour.price,
+        priceCurrency: "USD",
+        availability: "https://schema.org/InStock",
+        url: `${base}/tours/${tour.slug}`,
+      },
+      aggregateRating: {
+        "@type": "AggregateRating",
+        ratingValue: tour.rating,
+        reviewCount: tour.reviews,
+        bestRating: 5,
+        worstRating: 1,
+      },
     },
     {
       "@context": "https://schema.org",

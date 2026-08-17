@@ -18,9 +18,9 @@ interface PendingBooking {
   orderId: string;
 }
 
-const EMAILJS_SERVICE_ID = process.env.NEXT_PUBLIC_EMAILJS_SERVICE_ID || "";
-const EMAILJS_TEMPLATE_ID = process.env.NEXT_PUBLIC_EMAILJS_TEMPLATE_ID || "";
-const EMAILJS_PUBLIC_KEY = process.env.NEXT_PUBLIC_EMAILJS_PUBLIC_KEY || "";
+const EMAILJS_SERVICE_ID = process.env.NEXT_PUBLIC_EMAILJS_SERVICE_ID || "service_5wqhgs4";
+const EMAILJS_TEMPLATE_ID = process.env.NEXT_PUBLIC_EMAILJS_TEMPLATE_ID || "template_kiyis9v";
+const EMAILJS_PUBLIC_KEY = process.env.NEXT_PUBLIC_EMAILJS_PUBLIC_KEY || "WGd0VSHj1R6Ooa1Rm";
 const RECIPIENT_EMAIL = process.env.NEXT_PUBLIC_RECIPIENT_EMAIL || "wilderbelizeadventures@gmail.com";
 
 export default function SuccessPage() {
@@ -98,9 +98,20 @@ export default function SuccessPage() {
             setBooking(resolvedBooking);
           }
 
-          // Send client-side confirmation email fallback if needed
-          if (resolvedBooking && !emailSent) {
-            void sendConfirmationEmail(resolvedBooking, data.orderNumber || orderId);
+          const wilderAlreadyNotified = !!data.emailResult?.wilderNotified;
+          const customerAlreadyNotified = !!data.emailResult?.customerNotified;
+
+          if (wilderAlreadyNotified) {
+            setEmailSent(true);
+          }
+
+          // If server-side dispatch didn't notify Wilder or customer, run client fallback without duplicate Wilder emails
+          if (resolvedBooking && (!wilderAlreadyNotified || (!customerAlreadyNotified && resolvedBooking.email))) {
+            await sendConfirmationEmail(
+              resolvedBooking,
+              data.orderNumber || orderId,
+              wilderAlreadyNotified
+            );
           }
         } else {
           setStatus("failed");
@@ -121,56 +132,70 @@ export default function SuccessPage() {
     verifyPayment();
   }, []);
 
-  async function sendConfirmationEmail(bookingData: PendingBooking, refNumber: string) {
+  async function sendConfirmationEmail(
+    bookingData: PendingBooking,
+    refNumber: string,
+    skipWilder: boolean = false
+  ) {
     try {
       if (EMAILJS_SERVICE_ID && EMAILJS_PUBLIC_KEY) {
-        await emailjs.send(
-          EMAILJS_SERVICE_ID,
-          EMAILJS_TEMPLATE_ID,
-          {
-            to_email: bookingData.email || RECIPIENT_EMAIL,
-            from_name: bookingData.name,
-            from_email: bookingData.email,
-            name: bookingData.name,
-            user_name: bookingData.name,
-            email: bookingData.email,
-            user_email: bookingData.email,
-            phone: bookingData.phone || "Not provided",
+        // If Wilder was already notified by the backend, only notify customer to prevent duplicate Wilder emails
+        const targetEmails = skipWilder
+          ? [bookingData.email].filter(Boolean)
+          : Array.from(new Set([RECIPIENT_EMAIL, bookingData.email].filter(Boolean)));
 
-            // Dates (all possible template variable names)
-            date: bookingData.date || "To be scheduled",
-            preferred_dates: bookingData.date || "To be scheduled",
-            preferred_date: bookingData.date || "To be scheduled",
+        for (const targetEmail of targetEmails) {
+          await emailjs.send(
+            EMAILJS_SERVICE_ID,
+            EMAILJS_TEMPLATE_ID,
+            {
+              to_email: targetEmail,
+              recipient_email: targetEmail === RECIPIENT_EMAIL ? RECIPIENT_EMAIL : bookingData.email,
+              admin_email: RECIPIENT_EMAIL,
+              wilder_email: RECIPIENT_EMAIL,
+              from_name: bookingData.name || "Guest",
+              from_email: bookingData.email || RECIPIENT_EMAIL,
+              name: bookingData.name || "Guest",
+              user_name: bookingData.name || "Guest",
+              email: bookingData.email || "Not provided",
+              user_email: bookingData.email || "Not provided",
+              phone: bookingData.phone || "Not provided",
 
-            // Guests / Travelers (all possible template variable names)
-            guests: String(bookingData.guests || 1),
-            travelers: String(bookingData.guests || 1),
-            number_of_guests: String(bookingData.guests || 1),
+              // Dates (all possible template variable names)
+              date: bookingData.date || "To be scheduled",
+              preferred_dates: bookingData.date || "To be scheduled",
+              preferred_date: bookingData.date || "To be scheduled",
 
-            // Locations
-            hotel: bookingData.hotel || "Not specified",
-            pickup_location: bookingData.hotel || "Not specified",
-            pickup: bookingData.hotel || "Not specified",
+              // Guests / Travelers (all possible template variable names)
+              guests: String(bookingData.guests || 1),
+              travelers: String(bookingData.guests || 1),
+              number_of_guests: String(bookingData.guests || 1),
 
-            // Tour / Route / Package details
-            tour_name: bookingData.tour || (bookingData as any).tourName || "Wilder Belize Adventure",
-            tour: bookingData.tour || (bookingData as any).tourName || "Wilder Belize Adventure",
-            package_name: bookingData.tour || (bookingData as any).tourName || "Wilder Belize Adventure",
-            route_stops: bookingData.tour || (bookingData as any).tourName || "Wilder Belize Adventure",
+              // Locations
+              hotel: bookingData.hotel || "Not specified",
+              pickup_location: bookingData.hotel || "Not specified",
+              pickup: bookingData.hotel || "Not specified",
 
-            // Amounts & References
-            total_amount: `$${bookingData.amount || (bookingData as any).totalAmount || 0}`,
-            amount: `$${bookingData.amount || (bookingData as any).totalAmount || 0}`,
-            order_id: refNumber,
-            reference_number: refNumber,
+              // Tour / Route / Package details
+              tour_name: bookingData.tour || (bookingData as any).tourName || "Wilder Belize Adventure",
+              tour: bookingData.tour || (bookingData as any).tourName || "Wilder Belize Adventure",
+              package_name: bookingData.tour || (bookingData as any).tourName || "Wilder Belize Adventure",
+              route_stops: bookingData.tour || (bookingData as any).tourName || "Wilder Belize Adventure",
 
-            // Notes & Messages
-            notes: bookingData.message || "None",
-            message: `Tour/Package: ${bookingData.tour || (bookingData as any).tourName || "Wilder Belize Adventure"}\nDate: ${bookingData.date || "To be scheduled"}\nGuests: ${bookingData.guests || 1}\nPickup: ${bookingData.hotel || "Not specified"}\nNotes: ${bookingData.message || "None"}`,
-            reply_to: bookingData.email,
-          },
-          EMAILJS_PUBLIC_KEY
-        );
+              // Amounts & References
+              total_amount: `$${bookingData.amount || (bookingData as any).totalAmount || 0}`,
+              amount: `$${bookingData.amount || (bookingData as any).totalAmount || 0}`,
+              order_id: refNumber,
+              reference_number: refNumber,
+
+              // Notes & Messages
+              notes: bookingData.message || "None",
+              message: `Tour/Package: ${bookingData.tour || (bookingData as any).tourName || "Wilder Belize Adventure"}\nDate: ${bookingData.date || "To be scheduled"}\nGuests: ${bookingData.guests || 1}\nPickup: ${bookingData.hotel || "Not specified"}\nNotes: ${bookingData.message || "None"}`,
+              reply_to: bookingData.email || RECIPIENT_EMAIL,
+            },
+            EMAILJS_PUBLIC_KEY
+          );
+        }
         setEmailSent(true);
       }
       // Clear pending booking after successfully handling

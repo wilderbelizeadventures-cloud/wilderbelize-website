@@ -173,24 +173,31 @@ export function TransferBookingForm({
         throw new Error(data.message || "Payment initialization failed.");
       }
 
-      sessionStorage.setItem(
-        "pendingBooking",
-        JSON.stringify({
-          tour: transferTitle,
-          tourName: transferTitle,
-          date: currentRoute.tripType === "Round Trip" ? `${pickupDate} to ${returnDate}` : pickupDate,
-          guests: totalGuests,
-          hotel: pickupLocation,
-          name,
-          email,
-          phone,
-          amount: totalPrice,
-          totalAmount: totalPrice,
-          orderId: data.orderId,
-          orderNumber: data.orderNumber,
-          message: `Flight: ${flightNumber || "N/A"}. Children: ${childrenCount}. ${message}`,
-        })
-      );
+      const bookingPayload = {
+        tour: transferTitle,
+        tourName: transferTitle,
+        date: currentRoute.tripType === "Round Trip" ? `${pickupDate} to ${returnDate}` : pickupDate,
+        guests: totalGuests,
+        hotel: pickupLocation,
+        name,
+        email,
+        phone,
+        amount: totalPrice,
+        totalAmount: totalPrice,
+        orderId: data.orderId,
+        orderNumber: data.orderNumber,
+        message: `Flight: ${flightNumber || "N/A"}. Children: ${childrenCount}. ${message}`,
+      };
+
+      sessionStorage.setItem("pendingBooking", JSON.stringify(bookingPayload));
+
+      try {
+        document.cookie = `pendingBooking_${data.orderId}=${encodeURIComponent(
+          JSON.stringify(bookingPayload)
+        )}; path=/; max-age=86400; SameSite=Lax`;
+      } catch (e) {
+        console.warn("Could not write backup cookie", e);
+      }
 
       window.location.href = data.paymentUrl;
     } catch (err) {

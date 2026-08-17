@@ -46,16 +46,32 @@ export function PayNowButton({
         throw new Error(data.message || "Unable to start payment.");
       }
 
-      sessionStorage.setItem(
-        "pendingBooking",
-        JSON.stringify({
-          tour: tourName,
-          guests,
-          amount: totalAmount,
-          orderId: data.orderId,
-          termsAccepted: true,
-        })
-      );
+      const bookingPayload = {
+        tour: tourName,
+        tourName: tourName,
+        guests,
+        amount: totalAmount,
+        totalAmount: totalAmount,
+        orderId: data.orderId,
+        orderNumber: data.orderNumber,
+        name: "Valued Guest",
+        email: "",
+        phone: "",
+        date: "To be scheduled",
+        hotel: "Not specified",
+        message: "Booked via Direct Pay Now button",
+        termsAccepted: true,
+      };
+
+      sessionStorage.setItem("pendingBooking", JSON.stringify(bookingPayload));
+
+      try {
+        document.cookie = `pendingBooking_${data.orderId}=${encodeURIComponent(
+          JSON.stringify(bookingPayload)
+        )}; path=/; max-age=86400; SameSite=Lax`;
+      } catch (e) {
+        console.warn("Could not write backup cookie", e);
+      }
 
       window.location.href = data.paymentUrl;
     } catch (err) {

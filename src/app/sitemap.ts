@@ -1,7 +1,7 @@
 import type { MetadataRoute } from "next";
 import { tours } from "@/data/tours";
 
-const BASE = "https://wilderbelizeadventures.com";
+const BASE = "https://www.wilderbelizeadventures.com";
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const pages = ["", "/tours", "/build-your-route", "/transfers", "/about", "/travelers-info", "/contact", "/terms-and-conditions"].map((r) => ({

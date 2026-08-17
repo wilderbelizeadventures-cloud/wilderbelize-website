@@ -19,9 +19,9 @@ const body = Plus_Jakarta_Sans({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://wilderbelizeadventures.com"),
+  metadataBase: new URL("https://www.wilderbelizeadventures.com"),
   alternates: {
-    canonical: "https://wilderbelizeadventures.com",
+    canonical: "https://www.wilderbelizeadventures.com",
   },
   title: {
     default: "Wilder Belize Adventures — Tours & Excursions in Placencia, Belize",
@@ -84,8 +84,8 @@ export default function RootLayout({
     name: company.name,
     description:
       "Family-run adventure tour operator in Placencia, Belize offering jungle, cave, waterfall, Maya ruin and wildlife tours.",
-    url: "https://wilderbelizeadventures.com",
-    image: "https://wilderbelizeadventures.com/images/heroes/hero-coast.jpg",
+    url: "https://www.wilderbelizeadventures.com",
+    image: "https://www.wilderbelizeadventures.com/images/heroes/hero-coast.jpg",
     telephone: company.phones,
     email: company.emails[0],
     priceRange: "$$",

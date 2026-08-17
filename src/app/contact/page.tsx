@@ -14,7 +14,7 @@ export const metadata: Metadata = {
   description:
     "Get in touch with Wilder Belize Adventures in Placencia Village. Call, WhatsApp, or send us a message to plan your Belize adventure.",
   alternates: {
-    canonical: "https://wilderbelizeadventures.com/contact",
+    canonical: "https://www.wilderbelizeadventures.com/contact",
   },
 };
 
