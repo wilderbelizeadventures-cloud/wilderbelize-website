@@ -14,8 +14,8 @@ const QUICK: { label: string; interest: string }[] = [
   { label: "Wildlife", interest: "Wildlife" },
 ];
 
-const headlineWords = ["Are", "you", "in", "Belize?"];
-const headlinePhrase = "Explore Belize the Wilder way";
+const headlineWords = ["Welcome", "to", "Wilder", "Belize"];
+const headlinePhrase = "Adventures Tours and Transfers!";
 
 const wordReveal = {
   hidden: { opacity: 0, y: 36, filter: "blur(14px)" },
@@ -199,15 +199,15 @@ export function Hero() {
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
-          className="max-w-3xl"
+          className="max-w-4xl lg:max-w-5xl"
         >
           <span className="inline-flex items-center gap-2 rounded-full bg-white/10 px-4 py-1.5 text-xs font-bold uppercase tracking-[0.18em] text-white backdrop-blur ring-1 ring-white/20">
             <MapPin className="h-3.5 w-3.5 text-coral-300" /> {site.hero.kicker}
           </span>
 
           <h1
-            aria-label="Are you in Belize? Explore Belize the Wilder way"
-            className="mt-6 font-display text-5xl font-extrabold leading-[0.98] text-white drop-shadow-sm sm:text-6xl md:text-7xl lg:text-[5.2rem]"
+            aria-label="Welcome to Wilder Belize Adventures Tours and Transfers!"
+            className="mt-6 font-display text-4xl font-extrabold leading-[0.98] text-white drop-shadow-sm sm:text-6xl md:text-7xl lg:text-[4.5rem] xl:text-[5.2rem]"
           >
             <span aria-hidden="true" className="block overflow-hidden pb-1">
               {headlineWords.map((word, i) => (

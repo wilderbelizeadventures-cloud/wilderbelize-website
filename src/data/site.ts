@@ -24,7 +24,7 @@ export const site = {
   },
   "hero": {
     "kicker": "Placencia Village, Belize",
-    "headline": "Explore Belize, the Wilder Way",
+    "headline": "Welcome to Wilder Belize Adventures Tours and Transfers!",
     "subheadline": "From jungle waterfalls and Maya temples to the warm Caribbean,  Wilder Belize Adventures takes you deep into the real Belize.",
     "ctaPrimary": "Browse Adventures",
     "ctaSecondary": "Talk to a Guide"
