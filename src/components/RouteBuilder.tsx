@@ -20,7 +20,7 @@ import {
   Tent,
   Loader2,
 } from "lucide-react";
-import emailjs from "@emailjs/browser";
+
 import { company } from "@/data/site";
 import { SmartImage } from "@/components/SmartImage";
 import { cn } from "@/lib/utils";
@@ -303,11 +303,9 @@ const CATEGORY_CONFIG: Record<string, { kicker: string; title: string; descripti
   },
 };
 
-// EmailJS configuration - replace with your actual values from EmailJS dashboard
-const EMAILJS_SERVICE_ID = process.env.NEXT_PUBLIC_EMAILJS_SERVICE_ID || "your_service_id";
-const EMAILJS_TEMPLATE_ID = process.env.NEXT_PUBLIC_EMAILJS_TEMPLATE_ID || "your_template_id";
-const EMAILJS_PUBLIC_KEY = process.env.NEXT_PUBLIC_EMAILJS_PUBLIC_KEY || "your_public_key";
-const RECIPIENT_EMAIL = process.env.NEXT_PUBLIC_RECIPIENT_EMAIL || "bookings@wilderbelize.com";
+// Email recipient config (server-side in /api/inquiry)
+const OWNER_EMAIL = process.env.NEXT_PUBLIC_RECIPIENT_EMAIL || "wilderbelizeadventures@gmail.com";
+
 
 export function RouteBuilder() {
   const [route, setRoute] = useState<Tour[]>([]);
@@ -334,8 +332,8 @@ export function RouteBuilder() {
   }
 
   async function sendEmail() {
-    if (!details.name || !details.email) {
-      alert("Please fill in your name and email address.");
+    if (!details.name || !details.email || !details.email.includes("@")) {
+      setSendStatus("error");
       return;
     }
 
@@ -344,32 +342,30 @@ export function RouteBuilder() {
 
     try {
       const stops = route.map((tour, index) => `${index + 1}. ${tour.name}`).join("\n");
-      
-      await emailjs.send(
-        EMAILJS_SERVICE_ID,
-        EMAILJS_TEMPLATE_ID,
-        {
-          to_email: RECIPIENT_EMAIL,
-          from_name: details.name,
-          from_email: details.email,
+
+      const res = await fetch("/api/inquiry", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          type: "route",
           name: details.name,
           email: details.email,
-          user_name: details.name,
-          user_email: details.email,
-          phone: details.phone || "Not provided",
-          travelers: travelers.toString(),
-          preferred_dates: details.date || "Not provided",
-          pickup_location: details.pickup || "Not provided",
-          route_stops: stops,
-          notes: details.notes || "None",
-          message: `Stops:\n${stops}\nNotes: ${details.notes || "None"}`,
-          reply_to: details.email,
-        },
-        EMAILJS_PUBLIC_KEY
-      );
+          phone: details.phone || "",
+          date: details.date || "",
+          hotel: details.pickup || "",
+          guests: String(travelers),
+          message: details.notes || "",
+          routeStops: stops,
+          tour: route.length === 1 ? route[0].name : `Custom Route (${route.length} stops)`,
+        }),
+      });
+
+      const data = await res.json();
+      if (!res.ok || !data.ok) {
+        throw new Error(data.error || "Failed to send your request.");
+      }
 
       setSendStatus("success");
-      // Reset form after successful send
       setTimeout(() => {
         setFormOpen(false);
         setSendStatus("idle");
@@ -377,12 +373,13 @@ export function RouteBuilder() {
         setRoute([]);
       }, 2000);
     } catch (error) {
-      console.error("Failed to send email:", error);
+      console.error("Failed to send route request:", error);
       setSendStatus("error");
     } finally {
       setIsSending(false);
     }
   }
+
 
   // Group tours by category
   const categories = ["Full Day", "Half Day", "Multi-day"] as const;

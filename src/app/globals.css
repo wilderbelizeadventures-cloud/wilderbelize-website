@@ -296,3 +296,38 @@
     scroll-behavior: auto !important;
   }
 }
+
+/* Print Styles for A4 Invoice Printing */
+@media print {
+  body {
+    background: #ffffff !important;
+    color: #111827 !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  header, nav, footer, .no-print, button, a.btn, [role="navigation"] {
+    display: none !important;
+  }
+
+  main {
+    padding: 0 !important;
+    margin: 0 !important;
+    min-height: auto !important;
+    background: transparent !important;
+  }
+
+  .printable-invoice {
+    box-shadow: none !important;
+    border: 2px solid #0b3c26 !important;
+    border-radius: 16px !important;
+    padding: 24px !important;
+    margin: 0 auto !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    page-break-inside: avoid;
+    background-color: #ffffff !important;
+  }
+}

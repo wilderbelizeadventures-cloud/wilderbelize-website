@@ -31,7 +31,23 @@ export function MobileBookingBar({ price }: { price: number }) {
             <span className="text-sm font-medium text-ink-faint"> /person</span>
           </div>
         </div>
-        <a href="#book" className="btn btn-primary max-w-[60%] flex-1">Request to book</a>
+        <a
+          href="#book"
+          onClick={(e) => {
+            const target = document.getElementById("book") || document.getElementById("if-name");
+            if (target) {
+              e.preventDefault();
+              target.scrollIntoView({ behavior: "smooth", block: "start" });
+              setTimeout(() => {
+                const nameInput = document.getElementById("if-name");
+                if (nameInput) nameInput.focus();
+              }, 400);
+            }
+          }}
+          className="btn btn-primary max-w-[65%] flex-1 justify-center shadow-lg font-bold"
+        >
+          Book & Pay Now
+        </a>
       </div>
     </div>
   );

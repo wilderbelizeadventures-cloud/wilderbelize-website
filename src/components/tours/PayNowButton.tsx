@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Loader2, CreditCard } from "lucide-react";
+import { Loader2, CreditCard, AlertCircle } from "lucide-react";
 
 interface PayNowButtonProps {
   tourName: string;
@@ -28,6 +28,8 @@ export function PayNowButton({
     setLoading(true);
     setError("");
 
+    console.log("=== [PAY NOW BUTTON CLICKED] ===", { tourName, amount: totalAmount, guests });
+
     try {
       const res = await fetch("/api/payment", {
         method: "POST",
@@ -42,8 +44,10 @@ export function PayNowButton({
       });
 
       const data = await res.json();
+      console.log("=== [PAYMENT API RESPONSE RECEIVED] ===", data);
+
       if (!res.ok || !data.success) {
-        throw new Error(data.message || "Unable to start payment.");
+        throw new Error(data.message || `Payment failed (Status: ${res.status}).`);
       }
 
       const bookingPayload = {
@@ -73,8 +77,10 @@ export function PayNowButton({
         console.warn("Could not write backup cookie", e);
       }
 
+      console.log(`=== [PAYMENT REDIRECT] Redirecting to ${data.paymentUrl} ===`);
       window.location.href = data.paymentUrl;
     } catch (err) {
+      console.error("=== [PAY NOW BUTTON EXCEPTION] ===", err);
       setError(err instanceof Error ? err.message : "Something went wrong.");
       setLoading(false);
     }
@@ -101,7 +107,15 @@ export function PayNowButton({
           </>
         )}
       </button>
-      {error ? <p className="mt-3 text-sm font-semibold text-coral-600 text-center">{error}</p> : null}
+      {error ? (
+        <div className="mt-3 rounded-2xl border-2 border-coral-400 bg-coral-50 p-4 text-sm font-bold text-coral-900 shadow-md flex items-start gap-2 text-left">
+          <AlertCircle className="h-5 w-5 shrink-0 text-coral-600 mt-0.5" />
+          <div>
+            <p className="font-extrabold text-coral-900">Payment Alert</p>
+            <p className="text-xs font-medium text-coral-800 mt-0.5">{error}</p>
+          </div>
+        </div>
+      ) : null}
     </>
   );
 }

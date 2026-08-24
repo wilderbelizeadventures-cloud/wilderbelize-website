@@ -50,6 +50,7 @@ export function TourGallery({ images, alt, theme }: { images: string[]; alt: str
     <>
       <div className="grid h-[300px] grid-cols-3 grid-rows-2 gap-2.5 sm:h-[440px]">
         <button
+          suppressHydrationWarning
           onClick={() => openAt(0)}
           className="group relative col-span-3 row-span-2 overflow-hidden rounded-2xl sm:col-span-2"
         >

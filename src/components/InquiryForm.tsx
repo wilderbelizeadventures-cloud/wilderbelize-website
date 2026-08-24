@@ -1,21 +1,15 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useId, useRef } from "react";
 import { createPortal } from "react-dom";
-import { Minus, Plus, Loader2, Check, CalendarDays, Users, MessageSquare, PartyPopper, X } from "lucide-react";
+import { Minus, Plus, Loader2, Check, CalendarDays, Users, MessageSquare, PartyPopper, X, AlertCircle } from "lucide-react";
 import Link from "next/link";
-import emailjs from "@emailjs/browser";
+
 import { TermsAndConditions } from "@/components/TermsAndConditions";
 import { tours } from "@/data/tours";
 import { cn } from "@/lib/utils";
 
 type Mode = "booking" | "contact";
-
-// EmailJS Configuration for Contact Form
-const EMAILJS_SERVICE_ID = process.env.NEXT_PUBLIC_EMAILJS_SERVICE_ID || "";
-const EMAILJS_CONTACT_TEMPLATE_ID = process.env.NEXT_PUBLIC_EMAILJS_CONTACT_TEMPLATE_ID || "template_opzrwsp";
-const EMAILJS_PUBLIC_KEY = process.env.NEXT_PUBLIC_EMAILJS_PUBLIC_KEY || "";
-const RECIPIENT_EMAIL = process.env.NEXT_PUBLIC_RECIPIENT_EMAIL || "wilderbelizeadventures@gmail.com";
 
 type InquiryFormProps = {
   mode?: Mode;
@@ -39,6 +33,9 @@ export function InquiryForm({
   submitLabel,
   compact = false,
 }: InquiryFormProps) {
+  const idPrefix = useId();
+  const errorRef = useRef<HTMLDivElement>(null);
+
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
@@ -51,7 +48,6 @@ export function InquiryForm({
   const [company, setCompany] = useState(""); // honeypot — real users leave this empty
   const [state, setState] = useState<"idle" | "loading" | "done" | "error">("idle");
   const [error, setError] = useState("");
-  const [debugInfo, setDebugInfo] = useState<any>(null);
   const [termsOpen, setTermsOpen] = useState(false);
   const [termsAccepted, setTermsAccepted] = useState(false);
   const [today, setToday] = useState("");
@@ -71,150 +67,221 @@ export function InquiryForm({
     };
   }, [termsOpen]);
 
+  const clearErrorOnTyping = () => {
+    if (error) setError("");
+    if (state === "error") setState("idle");
+  };
+
+  function triggerValidationError(msg: string) {
+    setError(msg);
+    setState("error");
+    setTimeout(() => {
+      errorRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+    }, 50);
+  }
+
   function onSubmit(e: React.FormEvent) {
     e.preventDefault();
 
-    // Honeypot check - if company field is filled, it's a bot
-    if (company) {
+    if (company) return;
+
+    const nameVal = name.trim();
+    const emailVal = email.trim();
+    const phoneVal = phone.trim();
+    const dateVal = date || today || new Date().toISOString().split("T")[0];
+    const hotelVal = hotel.trim();
+    const messageVal = message.trim();
+
+    console.log("=== [FORM ONSUBMIT CALLED] ===", { mode, nameVal, emailVal, phoneVal, dateVal, hotelVal, messageVal });
+
+    if (!nameVal) {
+      triggerValidationError("Please enter your Full Name.");
       return;
     }
 
-    // Contact mode - send via EmailJS
+    if (!emailVal || !emailVal.includes("@")) {
+      triggerValidationError("Please enter a valid Email address.");
+      return;
+    }
+
+    if (mode === "booking" && !hotelVal) {
+      triggerValidationError("Please enter your Hotel or Pickup Location.");
+      return;
+    }
+
     if (mode === "contact") {
-      void sendContactEmail();
+      void sendContactEmail(nameVal, emailVal, phoneVal, messageVal);
       return;
     }
 
-    // Booking mode - start payment directly
-    void startPayment();
+    void startPayment(nameVal, emailVal, phoneVal, dateVal, hotelVal, messageVal);
   }
 
-async function sendContactEmail() {
-  if (!name || !email || !message) {
-    setError("Please fill in your name, email, and message.");
-    setState("error");
-    return;
+  async function sendContactEmail(
+    nameVal: string,
+    emailVal: string,
+    phoneVal: string,
+    messageVal: string
+  ) {
+    if (!nameVal || !emailVal || !messageVal) {
+      triggerValidationError("Please fill in your name, email, and message.");
+      return;
+    }
+
+    setState("loading");
+    setError("");
+
+    try {
+      const res = await fetch("/api/inquiry", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          type: "contact",
+          name: nameVal,
+          email: emailVal,
+          phone: phoneVal || "",
+          tour: tour || "",
+          date: date || "",
+          guests: String(guests),
+          hotel: hotel || "",
+          subject: subject || "",
+          message: messageVal,
+        }),
+      });
+
+      const data = await res.json();
+      if (!res.ok || !data.ok) {
+        throw new Error(data.error || "Failed to send message.");
+      }
+
+      setState("done");
+      setTimeout(() => {
+        setState("idle");
+        setName("");
+        setEmail("");
+        setPhone("");
+        setSubject("");
+        setMessage("");
+      }, 3000);
+    } catch (err) {
+      console.error("Failed to send inquiry:", err);
+      setState("error");
+      setError(err instanceof Error ? err.message : "Failed to send message. Please try again or contact us directly.");
+    }
   }
 
-  setState("loading");
-  setError("");
+  async function startPayment(
+    nameVal?: string,
+    emailVal?: string,
+    phoneVal?: string,
+    dateVal?: string,
+    hotelVal?: string,
+    messageVal?: string
+  ) {
+    const resolvedName = (nameVal || name).trim();
+    const resolvedEmail = (emailVal || email).trim();
+    const resolvedPhone = (phoneVal || phone).trim();
+    const resolvedDate = dateVal || date || today || new Date().toISOString().split("T")[0];
+    const resolvedHotel = (hotelVal || hotel).trim();
+    const resolvedMessage = (messageVal || message).trim();
 
-  try {
-    await emailjs.send(
-      EMAILJS_SERVICE_ID,
-      EMAILJS_CONTACT_TEMPLATE_ID,
-      {
-        to_email: RECIPIENT_EMAIL,
-        from_name: name,
-        from_email: email,
-        name: name,
-        email: email,
-        user_name: name,
-        user_email: email,
-        phone: phone || "Not provided",
-        subject: subject || "General Enquiry",
-        message: message,
-        reply_to: email,
-      },
-      EMAILJS_PUBLIC_KEY
-    );
-
-    setState("done");
-    // Reset form after successful send
-    setTimeout(() => {
-      setState("idle");
-      setName("");
-      setEmail("");
-      setPhone("");
-      setSubject("");
-      setMessage("");
-    }, 3000);
-  } catch (err) {
-    console.error("Failed to send email:", err);
-    setState("error");
-    setError("Failed to send message. Please try again or contact us directly.");
-  }
-}
-
-async function startPayment() {
-  setState("loading");
-  setError("");
-
-  try {
     const tourIdentifier = lockedTourName || tour;
     const selectedTour =
       tours.find((t) => t.name === tourIdentifier) ??
       tours.find((t) => t.slug === tourIdentifier) ??
+      tours.find((t) => t.name.toLowerCase().includes((tourIdentifier || "").toLowerCase())) ??
       (tourIdentifier ? { name: tourIdentifier, price: 150 } : null);
 
-    if (!selectedTour) {
-      throw new Error("Please choose a tour adventure.");
+    if (!resolvedName || !resolvedEmail || !resolvedDate) {
+      triggerValidationError("Please fill in your Full Name, Email, and Preferred Date.");
+      return;
     }
+
+    if (!selectedTour) {
+      triggerValidationError("Please select a valid tour adventure.");
+      return;
+    }
+
+    setState("loading");
+    setError("");
 
     const totalAmount = selectedTour.price * guests;
 
-    const res = await fetch("/api/payment", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        tourName: selectedTour.name,
-        amount: totalAmount,
-        name,
-        email,
-        phone,
-        date,
-        guests,
-        hotel,
-        message,
-      }),
+    console.log("=== [FORM SUBMIT INITIATED] ===", {
+      tourName: selectedTour.name,
+      amount: totalAmount,
+      name: resolvedName,
+      email: resolvedEmail,
+      phone: resolvedPhone,
+      date: resolvedDate,
+      guests,
+      hotel: resolvedHotel,
     });
 
-    const data = await res.json();
-
-    if (!res.ok || !data.success) {
-      console.error("Belize Bank Diagnostic Response:", data);
-      setError(
-        `${data.message || "Payment initialization failed."} (HTTP Status: ${data.httpStatus || res.status}, Code: ${data.errorCode ?? "N/A"})`
-      );
-      setDebugInfo(data);
-      throw new Error(data.message || "Payment initialization failed.");
-    }
-
-    const bookingPayload = {
-      tourName: selectedTour.name,
-      date,
-      guests,
-      hotel,
-      name,
-      email,
-      phone,
-      message,
-      totalAmount,
-      orderId: data.orderId,
-      orderNumber: data.orderNumber,
-    };
-
-    sessionStorage.setItem("pendingBooking", JSON.stringify(bookingPayload));
-    
-    // Cookie backup for cross-tab or mobile browser returns
     try {
-      document.cookie = `pendingBooking_${data.orderId}=${encodeURIComponent(
-        JSON.stringify(bookingPayload)
-      )}; path=/; max-age=86400; SameSite=Lax`;
-    } catch (e) {
-      console.warn("Could not write backup cookie", e);
-    }
+      const res = await fetch("/api/payment", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          tourName: selectedTour.name,
+          amount: totalAmount,
+          name: resolvedName,
+          email: resolvedEmail,
+          phone: resolvedPhone,
+          date: resolvedDate,
+          guests,
+          hotel: resolvedHotel,
+          message: resolvedMessage,
+        }),
+      });
 
-    window.location.href = data.paymentUrl;
-  } catch (err) {
-    setState("error");
-    if (!error) {
-      setError(err instanceof Error ? err.message : "Something went wrong.");
+      const data = await res.json();
+      console.log("=== [PAYMENT API RESPONSE RECEIVED] ===", data);
+
+      if (!res.ok || !data.success) {
+        console.error("Belize Bank Diagnostic Response:", data);
+        const errMsg = `${data.message || "Payment initialization failed."}`;
+        setError(errMsg);
+        throw new Error(errMsg);
+      }
+
+      const bookingPayload = {
+        tourName: selectedTour.name,
+        date: resolvedDate,
+        guests,
+        hotel: resolvedHotel,
+        name: resolvedName,
+        email: resolvedEmail,
+        phone: resolvedPhone,
+        message: resolvedMessage,
+        totalAmount,
+        orderId: data.orderId,
+        orderNumber: data.orderNumber,
+      };
+
+      sessionStorage.setItem("pendingBooking", JSON.stringify(bookingPayload));
+
+      try {
+        document.cookie = `pendingBooking_${data.orderId}=${encodeURIComponent(
+          JSON.stringify(bookingPayload)
+        )}; path=/; max-age=86400; SameSite=Lax`;
+      } catch (e) {
+        console.warn("Could not write backup cookie", e);
+      }
+
+      console.log(`=== [PAYMENT REDIRECT] Redirecting browser to payment URL: ${data.paymentUrl} ===`);
+      window.location.href = data.paymentUrl;
+    } catch (err) {
+      console.error("=== [START PAYMENT EXCEPTION] ===", err);
+      setState("error");
+      if (!error) {
+        setError(err instanceof Error ? err.message : "Something went wrong initiating payment.");
+      }
     }
   }
-}
+
   if (state === "done") {
     return (
       <div className={cn("rounded-3xl bg-jungle-800 p-8 text-center text-white", className)}>
@@ -241,38 +308,84 @@ async function startPayment() {
   }
 
   return (
-    <form onSubmit={onSubmit} className={cn("space-y-4", className)} suppressHydrationWarning>
+    <form onSubmit={onSubmit} noValidate className={cn("space-y-4", className)} suppressHydrationWarning>
       {/* Honeypot — visually hidden, ignored by humans */}
       <div aria-hidden className="absolute -left-[9999px] h-0 w-0 overflow-hidden">
-        <label htmlFor="if-company">Company</label>
-        <input id="if-company" tabIndex={-1} autoComplete="off" value={company} onChange={(e) => setCompany(e.target.value)} suppressHydrationWarning />
+        <label htmlFor={`${idPrefix}-company`}>Company</label>
+        <input
+          id={`${idPrefix}-company`}
+          tabIndex={-1}
+          autoComplete="off"
+          value={company}
+          onChange={(e) => setCompany(e.target.value)}
+          suppressHydrationWarning
+        />
       </div>
 
       <div className={rowCls}>
         <div>
-          <label className={labelCls} htmlFor="if-name">Full name</label>
-          <input id="if-name" className={inputCls} value={name} onChange={(e) => setName(e.target.value)} required placeholder="Jane Traveler" suppressHydrationWarning />
+          <label className={labelCls} htmlFor={`${idPrefix}-name`}>Full name</label>
+          <input
+            id={`${idPrefix}-name`}
+            className={inputCls}
+            value={name}
+            onChange={(e) => { setName(e.target.value); clearErrorOnTyping(); }}
+            required
+            placeholder="Jane Traveler"
+            suppressHydrationWarning
+          />
         </div>
         <div>
-          <label className={labelCls} htmlFor="if-email">Email</label>
-          <input id="if-email" type="email" className={inputCls} value={email} onChange={(e) => setEmail(e.target.value)} required placeholder="you@email.com" suppressHydrationWarning />
+          <label className={labelCls} htmlFor={`${idPrefix}-email`}>Email</label>
+          <input
+            id={`${idPrefix}-email`}
+            type="email"
+            className={inputCls}
+            value={email}
+            onChange={(e) => { setEmail(e.target.value); clearErrorOnTyping(); }}
+            required
+            placeholder="you@email.com"
+            suppressHydrationWarning
+          />
         </div>
       </div>
 
       <div className={rowCls}>
         <div>
-          <label className={labelCls} htmlFor="if-phone">Phone / WhatsApp <span className="font-medium normal-case text-ink-faint">(optional)</span></label>
-          <input id="if-phone" className={inputCls} value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="+1 555 123 4567" suppressHydrationWarning />
+          <label className={labelCls} htmlFor={`${idPrefix}-phone`}>Phone / WhatsApp <span className="font-medium normal-case text-ink-faint">(optional)</span></label>
+          <input
+            id={`${idPrefix}-phone`}
+            className={inputCls}
+            value={phone}
+            onChange={(e) => { setPhone(e.target.value); clearErrorOnTyping(); }}
+            placeholder="+1 555 123 4567"
+            suppressHydrationWarning
+          />
         </div>
         {mode === "contact" ? (
           <div>
-            <label className={labelCls} htmlFor="if-subject">Subject <span className="font-medium normal-case text-ink-faint">(optional)</span></label>
-            <input id="if-subject" className={inputCls} value={subject} onChange={(e) => setSubject(e.target.value)} placeholder="Trip planning, custom tour…" />
+            <label className={labelCls} htmlFor={`${idPrefix}-subject`}>Subject <span className="font-medium normal-case text-ink-faint">(optional)</span></label>
+            <input
+              id={`${idPrefix}-subject`}
+              className={inputCls}
+              value={subject}
+              onChange={(e) => { setSubject(e.target.value); clearErrorOnTyping(); }}
+              placeholder="Trip planning, custom tour…"
+            />
           </div>
         ) : (
           <div>
-            <label className={labelCls} htmlFor="if-date"><CalendarDays className="mr-1 inline h-3.5 w-3.5" /> Preferred date</label>
-            <input id="if-date" type="date" min={today} suppressHydrationWarning required={mode === "booking"} className={inputCls} value={date} onChange={(e) => setDate(e.target.value)} />
+            <label className={labelCls} htmlFor={`${idPrefix}-date`}><CalendarDays className="mr-1 inline h-3.5 w-3.5" /> Preferred date</label>
+            <input
+              id={`${idPrefix}-date`}
+              type="date"
+              min={today}
+              suppressHydrationWarning
+              required={mode === "booking"}
+              className={inputCls}
+              value={date}
+              onChange={(e) => { setDate(e.target.value); clearErrorOnTyping(); }}
+            />
           </div>
         )}
       </div>
@@ -280,16 +393,22 @@ async function startPayment() {
       {mode === "booking" && (
         <div className={rowCls}>
           <div>
-            <label className={labelCls} htmlFor="if-tour">Tour</label>
+            <label className={labelCls} htmlFor={`${idPrefix}-tour`}>Tour</label>
             {lockedTourName ? (
               <input
-                id="if-tour"
+                id={`${idPrefix}-tour`}
                 readOnly
                 value={lockedTourName}
                 className="w-full rounded-xl border border-jungle-500/30 bg-jungle-50 px-4 py-2.5 text-sm font-semibold text-jungle-800"
               />
             ) : (
-              <select id="if-tour" className={inputCls} value={tour} onChange={(e) => setTour(e.target.value)} required>
+              <select
+                id={`${idPrefix}-tour`}
+                className={inputCls}
+                value={tour}
+                onChange={(e) => { setTour(e.target.value); clearErrorOnTyping(); }}
+                required
+              >
                 <option value="">Choose an adventure…</option>
                 <optgroup label="Full Day">
                   {tours.filter((t) => t.category === "Full Day").map((t) => (
@@ -305,13 +424,24 @@ async function startPayment() {
             )}
           </div>
           <div>
-            <span id="if-guests-label" className={labelCls}><Users className="mr-1 inline h-3.5 w-3.5" /> Guests</span>
-            <div role="group" aria-labelledby="if-guests-label" className="flex items-center justify-between rounded-xl border border-ink/15 bg-sand-50 px-2 py-1.5">
-              <button type="button" aria-label="Fewer guests" onClick={() => setGuests((g) => Math.max(3, g - 1))} disabled={guests <= 3} className="flex h-9 w-9 items-center justify-center rounded-lg bg-white text-ink shadow-sm transition hover:bg-jungle-50 disabled:cursor-not-allowed disabled:opacity-50">
+            <span id={`${idPrefix}-guests-label`} className={labelCls}><Users className="mr-1 inline h-3.5 w-3.5" /> Guests</span>
+            <div role="group" aria-labelledby={`${idPrefix}-guests-label`} className="flex items-center justify-between rounded-xl border border-ink/15 bg-sand-50 px-2 py-1.5">
+              <button
+                type="button"
+                aria-label="Fewer guests"
+                onClick={() => setGuests((g) => Math.max(3, g - 1))}
+                disabled={guests <= 3}
+                className="flex h-9 w-9 items-center justify-center rounded-lg bg-white text-ink shadow-sm transition hover:bg-jungle-50 disabled:cursor-not-allowed disabled:opacity-50"
+              >
                 <Minus className="h-4 w-4" />
               </button>
               <span className="text-base font-bold text-ink" aria-live="polite">{guests}</span>
-              <button type="button" aria-label="More guests" onClick={() => setGuests((g) => Math.min(20, g + 1))} className="flex h-9 w-9 items-center justify-center rounded-lg bg-white text-ink shadow-sm transition hover:bg-jungle-50">
+              <button
+                type="button"
+                aria-label="More guests"
+                onClick={() => setGuests((g) => Math.min(20, g + 1))}
+                className="flex h-9 w-9 items-center justify-center rounded-lg bg-white text-ink shadow-sm transition hover:bg-jungle-50"
+              >
                 <Plus className="h-4 w-4" />
               </button>
             </div>
@@ -319,103 +449,113 @@ async function startPayment() {
         </div>
       )}
       <div>
-  <label className={labelCls} htmlFor="if-hotel">
-    Hotel / Pickup Location
-  </label>
-
-  <input
-    id="if-hotel"
-    className={inputCls}
-    value={hotel}
-    onChange={(e) => setHotel(e.target.value)}
-    placeholder="Placencia Resort, AirBnB, etc."
-    required={mode === "booking"}
-  />
-</div>
+        <label className={labelCls} htmlFor={`${idPrefix}-hotel`}>
+          Hotel / Pickup Location
+        </label>
+        <input
+          id={`${idPrefix}-hotel`}
+          className={inputCls}
+          value={hotel}
+          onChange={(e) => { setHotel(e.target.value); clearErrorOnTyping(); }}
+          placeholder="Placencia Resort, AirBnB, etc."
+          required={mode === "booking"}
+        />
+      </div>
       <div>
-        <label className={labelCls} htmlFor="if-message">
+        <label className={labelCls} htmlFor={`${idPrefix}-message`}>
           <MessageSquare className="mr-1 inline h-3.5 w-3.5" />
           {mode === "contact" ? "Your message" : "Anything we should know?"}
           {mode === "booking" && <span className="font-medium normal-case text-ink-faint"> (optional)</span>}
         </label>
         <textarea
-          id="if-message"
+          id={`${idPrefix}-message`}
           className={cn(inputCls, "min-h-[96px] resize-y")}
           value={message}
-          onChange={(e) => setMessage(e.target.value)}
+          onChange={(e) => { setMessage(e.target.value); clearErrorOnTyping(); }}
           required={mode === "contact"}
           placeholder={mode === "contact" ? "Tell us what you're dreaming up…" : "Hotel name, kids' ages, dietary needs, special requests…"}
         />
       </div>
+
       {mode === "booking" && (() => {
-  const tourIdentifier = lockedTourName || tour;
-  const selectedTour =
-    tours.find((t) => t.name === tourIdentifier) ??
-    tours.find((t) => t.slug === tourIdentifier) ??
-    (tourIdentifier ? { name: tourIdentifier, price: 150 } : null);
+        const tourIdentifier = lockedTourName || tour;
+        const selectedTour =
+          tours.find((t) => t.name === tourIdentifier) ??
+          tours.find((t) => t.slug === tourIdentifier) ??
+          (tourIdentifier ? { name: tourIdentifier, price: 150 } : null);
 
-  const total = (selectedTour?.price ?? 0) * guests;
+        const total = (selectedTour?.price ?? 0) * guests;
 
-  return (
-    <div className="rounded-2xl border border-jungle-200 bg-jungle-50 p-4">
-      <h3 className="mb-3 text-lg font-semibold text-jungle-800">
-        Booking Summary
-      </h3>
+        return (
+          <div className="rounded-2xl border border-jungle-200 bg-jungle-50 p-4">
+            <h3 className="mb-3 text-lg font-semibold text-jungle-800">
+              Booking Summary
+            </h3>
 
-      <div className="space-y-2 text-sm">
-        <div className="flex justify-between">
-          <span>Tour</span>
-          <span>{selectedTour?.name}</span>
+            <div className="space-y-2 text-sm">
+              <div className="flex justify-between">
+                <span>Tour</span>
+                <span>{selectedTour?.name}</span>
+              </div>
+
+              <div className="flex justify-between">
+                <span>Date</span>
+                <span>{date || "-"}</span>
+              </div>
+
+              <div className="flex justify-between">
+                <span>Guests</span>
+                <span>{guests}</span>
+              </div>
+
+              <div className="flex justify-between">
+                <span>Pickup</span>
+                <span>{hotel || "-"}</span>
+              </div>
+
+              <hr />
+
+              <div className="flex justify-between text-lg font-bold text-jungle-700">
+                <span>Total</span>
+                <span>${total} USD</span>
+              </div>
+            </div>
+          </div>
+        );
+      })()}
+
+      {error && (
+        <div ref={errorRef} className="rounded-2xl border-2 border-coral-400 bg-coral-50 p-4 text-sm font-bold text-coral-900 shadow-md flex items-start gap-2.5 my-3">
+          <AlertCircle className="h-5 w-5 shrink-0 text-coral-600 mt-0.5" />
+          <div>
+            <p className="font-extrabold text-coral-900">Please Check Your Details</p>
+            <p className="text-xs font-medium text-coral-800 mt-0.5">{error}</p>
+          </div>
         </div>
+      )}
 
-        <div className="flex justify-between">
-          <span>Date</span>
-          <span>{date || "-"}</span>
-        </div>
-
-        <div className="flex justify-between">
-          <span>Guests</span>
-          <span>{guests}</span>
-        </div>
-
-        <div className="flex justify-between">
-          <span>Pickup</span>
-          <span>{hotel || "-"}</span>
-        </div>
-
-        <hr />
-
-        <div className="flex justify-between text-lg font-bold text-jungle-700">
-          <span>Total</span>
-          <span>${total}</span>
-        </div>
-      </div>
-    </div>
-  );
-})()}
-      {state === "error" && <p className="text-sm font-semibold text-coral-600">{error}</p>}
-
-      <button type="submit" disabled={state === "loading"} className="btn btn-primary w-full">
+      <button
+        type="submit"
+        suppressHydrationWarning
+        disabled={state === "loading"}
+        className="btn btn-primary w-full cursor-pointer disabled:cursor-not-allowed disabled:opacity-60"
+      >
         {state === "loading" ? (
           <Loader2 className="h-5 w-5 animate-spin" />
         ) : (
           <>
-            {
-  submitLabel ??
-  (mode === "contact"
-    ? "Send Message"
-    : "Pay & Book Now")
-}
+            {submitLabel ?? (mode === "contact" ? "Send Message" : "Pay & Book Now")}
             <Check className="h-4 w-4" />
           </>
         )}
       </button>
+
       <p className="text-center text-xs text-ink-faint">
         Secure payment powered by Belize Bank. Your booking will be confirmed after successful payment.
       </p>
 
       {termsOpen && typeof document !== "undefined" && createPortal(
-        <div className="fixed inset-x-0 bottom-0 top-20 z-[2147483647] flex items-center justify-center p-4" role="dialog" aria-modal="true" aria-labelledby="terms-dialog-title">
+        <div className="fixed inset-x-0 bottom-0 top-20 z-[2147483647] flex items-center justify-center p-4" role="dialog" aria-modal="true" aria-labelledby={`${idPrefix}-terms-dialog-title`}>
           <button
             type="button"
             aria-label="Close terms and conditions"
@@ -426,7 +566,7 @@ async function startPayment() {
             <div className="flex items-start justify-between gap-4 border-b border-ink/10 bg-white px-6 py-5">
               <div>
                 <p className="text-xs font-bold uppercase tracking-widest text-coral-600">One last step</p>
-                <h2 id="terms-dialog-title" className="mt-1 font-display text-2xl font-bold text-ink">Terms & Conditions</h2>
+                <h2 id={`${idPrefix}-terms-dialog-title`} className="mt-1 font-display text-2xl font-bold text-ink">Terms & Conditions</h2>
               </div>
               <button type="button" onClick={() => setTermsOpen(false)} aria-label="Close" className="rounded-xl p-2 text-ink-soft transition hover:bg-sand-100 hover:text-ink">
                 <X className="h-5 w-5" />

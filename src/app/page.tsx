@@ -117,7 +117,7 @@ export default function HomePage() {
                 loop
                 playsInline
                 controls
-                poster="/images/heroes/hero-jungle.jpg"
+                poster="/images/heroes/hero-waterfall.jpg"
               >
                 <source src="/videos/wilder-website-cinematic.mp4" type="video/mp4" />
                 Your browser does not support the video tag.
