@@ -49,7 +49,7 @@ export function InquiryForm({
   const [state, setState] = useState<"idle" | "loading" | "done" | "error">("idle");
   const [error, setError] = useState("");
   const [termsOpen, setTermsOpen] = useState(false);
-  const [termsAccepted, setTermsAccepted] = useState(false);
+  const [termsAccepted, setTermsAccepted] = useState(true);
   const [today, setToday] = useState("");
 
   useEffect(() => {
@@ -155,14 +155,6 @@ export function InquiryForm({
       }
 
       setState("done");
-      setTimeout(() => {
-        setState("idle");
-        setName("");
-        setEmail("");
-        setPhone("");
-        setSubject("");
-        setMessage("");
-      }, 3000);
     } catch (err) {
       console.error("Failed to send inquiry:", err);
       setState("error");

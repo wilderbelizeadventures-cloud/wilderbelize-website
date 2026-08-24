@@ -88,11 +88,13 @@ export function TransferBookingForm({
   const [state, setState] = useState<"idle" | "loading" | "error">("idle");
   const [error, setError] = useState("");
   const [termsOpen, setTermsOpen] = useState(false);
-  const [termsAccepted, setTermsAccepted] = useState(false);
+  const [termsAccepted, setTermsAccepted] = useState(true);
   const [today, setToday] = useState("");
 
   useEffect(() => {
-    setToday(new Date().toISOString().split("T")[0]);
+    const todayStr = new Date().toISOString().split("T")[0];
+    setToday(todayStr);
+    if (!pickupDate) setPickupDate(todayStr);
   }, []);
 
   useEffect(() => {
@@ -122,10 +124,16 @@ export function TransferBookingForm({
     e.preventDefault();
     if (company) return; // Honeypot check
 
-    if (!name || !email || !pickupDate || !pickupLocation) {
-      setError("Please fill in all required fields (Name, Email, Date, Pickup Location).");
+    const effectiveDate = pickupDate || today || new Date().toISOString().split("T")[0];
+
+    if (!name || !email || !pickupLocation) {
+      setError("Please fill in your Name, Email, and Pickup Location.");
       setState("error");
       return;
+    }
+
+    if (!pickupDate) {
+      setPickupDate(effectiveDate);
     }
 
     if (currentRoute.tripType === "Round Trip" && !returnDate) {
