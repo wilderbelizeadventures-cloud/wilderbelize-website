@@ -30,6 +30,7 @@ export function MobileBookingBar({ price }: { price: number }) {
             ${price}
             <span className="text-sm font-medium text-ink-faint"> /person</span>
           </div>
+          <div className="text-[0.65rem] font-semibold text-ink-faint">+12.5% GST added at checkout</div>
         </div>
         <a
           href="#book"

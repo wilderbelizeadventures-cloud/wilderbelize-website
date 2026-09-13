@@ -50,11 +50,7 @@ export function InquiryForm({
   const [error, setError] = useState("");
   const [termsOpen, setTermsOpen] = useState(false);
   const [termsAccepted, setTermsAccepted] = useState(true);
-  const [today, setToday] = useState("");
-
-  useEffect(() => {
-    setToday(new Date().toISOString().split("T")[0]);
-  }, []);
+  const [today] = useState(() => (typeof window !== "undefined" ? new Date().toISOString().split("T")[0] : ""));
   const rowCls = cn("grid gap-4", !compact && "sm:grid-cols-2");
 
   useEffect(() => {
@@ -197,7 +193,8 @@ export function InquiryForm({
     setState("loading");
     setError("");
 
-    const totalAmount = selectedTour.price * guests;
+    const subtotalAmount = selectedTour.price * guests;
+    const totalAmount = Number((subtotalAmount * 1.125).toFixed(2));
 
     console.log("=== [FORM SUBMIT INITIATED] ===", {
       tourName: selectedTour.name,
@@ -507,9 +504,21 @@ export function InquiryForm({
 
               <hr />
 
+              <div className="flex justify-between text-ink-soft">
+                <span>Subtotal</span>
+                <span>${total} USD</span>
+              </div>
+
+              <div className="flex justify-between text-ink-soft">
+                <span>GST (12.5%)</span>
+                <span>${(total * 0.125).toFixed(2)} USD</span>
+              </div>
+
+              <hr />
+
               <div className="flex justify-between text-lg font-bold text-jungle-700">
                 <span>Total</span>
-                <span>${total} USD</span>
+                <span>${(total * 1.125).toFixed(2)} USD</span>
               </div>
             </div>
           </div>

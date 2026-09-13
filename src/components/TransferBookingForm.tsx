@@ -73,10 +73,11 @@ export function TransferBookingForm({
   className,
 }: TransferBookingFormProps) {
   const [selectedRouteId, setSelectedRouteId] = useState(initialRouteId);
+  const [prevInitialRouteId, setPrevInitialRouteId] = useState(initialRouteId);
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
-  const [pickupDate, setPickupDate] = useState("");
+  const [pickupDate, setPickupDate] = useState(() => (typeof window !== "undefined" ? new Date().toISOString().split("T")[0] : ""));
   const [returnDate, setReturnDate] = useState("");
   const [adults, setAdults] = useState(2);
   const [childrenCount, setChildrenCount] = useState(0);
@@ -89,19 +90,14 @@ export function TransferBookingForm({
   const [error, setError] = useState("");
   const [termsOpen, setTermsOpen] = useState(false);
   const [termsAccepted, setTermsAccepted] = useState(true);
-  const [today, setToday] = useState("");
+  const [today] = useState(() => (typeof window !== "undefined" ? new Date().toISOString().split("T")[0] : ""));
 
-  useEffect(() => {
-    const todayStr = new Date().toISOString().split("T")[0];
-    setToday(todayStr);
-    if (!pickupDate) setPickupDate(todayStr);
-  }, []);
-
-  useEffect(() => {
+  if (initialRouteId !== prevInitialRouteId) {
+    setPrevInitialRouteId(initialRouteId);
     if (initialRouteId) {
       setSelectedRouteId(initialRouteId);
     }
-  }, [initialRouteId]);
+  }
 
   useEffect(() => {
     if (!termsOpen) return;
@@ -160,7 +156,7 @@ export function TransferBookingForm({
         },
         body: JSON.stringify({
           tourName: transferTitle,
-          amount: totalPrice,
+          amount: Number((totalPrice * 1.125).toFixed(2)),
           name,
           email,
           phone,
@@ -190,8 +186,8 @@ export function TransferBookingForm({
         name,
         email,
         phone,
-        amount: totalPrice,
-        totalAmount: totalPrice,
+        amount: Number((totalPrice * 1.125).toFixed(2)),
+        totalAmount: Number((totalPrice * 1.125).toFixed(2)),
         orderId: data.orderId,
         orderNumber: data.orderNumber,
         message: `Flight: ${flightNumber || "N/A"}. Children: ${childrenCount}. ${message}`,
@@ -483,9 +479,21 @@ export function TransferBookingForm({
 
           <hr className="my-2 border-jungle-200" />
 
+          <div className="flex justify-between text-ink-soft">
+            <span>Subtotal:</span>
+            <span className="font-semibold">${totalPrice} USD</span>
+          </div>
+
+          <div className="flex justify-between text-ink-soft">
+            <span>GST (12.5%):</span>
+            <span className="font-semibold">${(totalPrice * 0.125).toFixed(2)} USD</span>
+          </div>
+
+          <hr className="my-2 border-jungle-200" />
+
           <div className="flex items-center justify-between text-lg font-extrabold text-jungle-900">
             <span>Total Payable:</span>
-            <span className="text-2xl text-jungle-800">${totalPrice} USD</span>
+            <span className="text-2xl text-jungle-800">${(totalPrice * 1.125).toFixed(2)} USD</span>
           </div>
         </div>
       </div>
@@ -502,7 +510,7 @@ export function TransferBookingForm({
         ) : (
           <>
             <CreditCard className="h-5 w-5 shrink-0" />
-            <span>Pay & Book Transfer (${totalPrice} USD)</span>
+            <span>Pay & Book Transfer (${(totalPrice * 1.125).toFixed(2)} USD)</span>
             <Check className="h-4 w-4 shrink-0" />
           </>
         )}
@@ -586,7 +594,7 @@ export function TransferBookingForm({
                     {state === "loading" ? (
                       <Loader2 className="h-5 w-5 animate-spin" />
                     ) : (
-                      `Proceed to Pay $${totalPrice} USD`
+                      `Proceed to Pay $${(totalPrice * 1.125).toFixed(2)} USD`
                     )}
                   </button>
                 </div>

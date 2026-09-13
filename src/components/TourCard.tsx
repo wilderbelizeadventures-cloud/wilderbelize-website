@@ -43,8 +43,9 @@ export function TourCard({ tour, priority = false, className }: { tour: Tour; pr
             <Star className="h-3.5 w-3.5 fill-gold-400 text-gold-400" /> {tour.rating.toFixed(1)}
             <span className="text-white/70">({tour.reviews})</span>
           </span>
-          <span className="rounded-full bg-white px-3 py-1.5 text-sm font-extrabold text-ink shadow">
-            <span className="text-[0.65rem] font-semibold uppercase text-ink-faint">from </span>${tour.price}
+          <span className="rounded-2xl bg-white/95 px-3 py-1.5 text-sm font-extrabold text-ink shadow backdrop-blur flex flex-col items-end leading-tight">
+            <span><span className="text-[0.65rem] font-semibold uppercase text-ink-faint">from </span>${tour.price}</span>
+            <span className="text-[0.6rem] font-semibold text-ink-faint whitespace-nowrap">+12.5% GST at checkout</span>
           </span>
         </div>
       </div>

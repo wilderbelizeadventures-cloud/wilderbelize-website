@@ -103,6 +103,7 @@ export function TransferPageContent({ siteTransfer }: TransferPageContentProps) 
                       <div>
                         <span className="text-xs font-semibold uppercase text-ink-faint">Rate (1-4 Persons)</span>
                         <div className="font-display text-2xl font-extrabold text-ink">{r.price}</div>
+                        <div className="text-[0.65rem] font-semibold text-ink-faint mt-0.5">+12.5% GST added at checkout</div>
                       </div>
                     </div>
 

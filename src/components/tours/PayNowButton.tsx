@@ -21,7 +21,8 @@ export function PayNowButton({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  const totalAmount = amount * guests;
+  const subtotalAmount = amount * guests;
+  const totalAmount = Number((subtotalAmount * 1.125).toFixed(2));
 
   const handleClick = async () => {
     if (loading) return;

@@ -1,18 +1,20 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useSyncExternalStore } from "react";
 import { MessageCircle, X } from "lucide-react";
 import ChatWindow from "./ChatWindow";
 
+const emptySubscribe = () => () => {};
+
 export default function ChatWidget() {
   const [isOpen, setIsOpen] = useState(false);
-  const [mounted, setMounted] = useState(false);
+  const isClient = useSyncExternalStore(
+    emptySubscribe,
+    () => true,
+    () => false
+  );
 
-  useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  if (!mounted) return null;
+  if (!isClient) return null;
 
   return (
     <>

@@ -90,7 +90,7 @@ export function ToursExplorer({
     setQuery("");
   }
 
-  const FilterControls = () => (
+  const renderFilterControls = () => (
     <div className="space-y-7">
       <div>
         <h3 className="mb-3 font-display text-sm font-bold uppercase tracking-wider text-ink">Category</h3>
@@ -211,7 +211,7 @@ export function ToursExplorer({
           {/* Desktop sidebar */}
           <aside className="hidden lg:block">
             <div className="sticky top-24 rounded-3xl bg-white p-6 shadow-soft ring-1 ring-ink/5">
-              <FilterControls />
+              {renderFilterControls()}
             </div>
           </aside>
 
@@ -255,7 +255,7 @@ export function ToursExplorer({
                 <X className="h-5 w-5" />
               </button>
             </div>
-            <FilterControls />
+            {renderFilterControls()}
             <button onClick={() => setDrawerOpen(false)} className="btn btn-primary mt-8 w-full">
               Show {filtered.length} adventures
             </button>

@@ -168,15 +168,6 @@ const INDIVIDUAL_TOURS: Tour[] = [
     theme: "waterfall",
   },
   {
-    slug: "monkey-river-tour",
-    name: "Monkey River Marine & Terrestrial Wildlife Tour",
-    category: "Half Day",
-    duration: "Half Day · 4-5 hrs",
-    shortDescription: "Cruise up Monkey River spotting howler monkeys, crocodiles, and manatees, then hike through rainforest teeming with wildlife.",
-    image: "/images/monkey_river/mon1.jpg",
-    theme: "monkey-river",
-  },
-  {
     slug: "cheil-chocolate-making",
     name: "Chei'l Mayan Chocolate Making",
     category: "Half Day",

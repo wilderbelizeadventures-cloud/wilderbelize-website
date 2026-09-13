@@ -246,6 +246,7 @@ export default async function TourDetailPage({ params }: { params: Promise<{ slu
                       ${tour.price}
                       <span className="text-base font-semibold text-ink-faint"> / person</span>
                     </div>
+                    <div className="mt-0.5 text-xs font-semibold text-ink-faint">+12.5% GST added at checkout</div>
                   </div>
                   <div className="text-right">
                     <div className="flex items-center gap-1 text-sm font-bold text-ink">

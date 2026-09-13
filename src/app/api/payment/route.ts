@@ -119,7 +119,7 @@ export async function POST(req: NextRequest) {
     console.log(`Belize Bank HTTP Status: ${responseStatus} ${responseStatusText}`);
     console.log(`Belize Bank Raw Response Body: ${rawResponseBody}`);
 
-    let data: any = {};
+    let data: Record<string, unknown> = {};
     try {
       data = JSON.parse(rawResponseBody);
     } catch (parseErr) {
@@ -181,7 +181,7 @@ export async function POST(req: NextRequest) {
 
     if (data.orderId) {
       storePendingBooking({
-        orderId: data.orderId,
+        orderId: String(data.orderId),
         orderNumber,
         name: typeof name === "string" ? name : "Valued Guest",
         email: typeof email === "string" ? email : "",

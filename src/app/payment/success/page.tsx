@@ -6,23 +6,23 @@ import { CheckCircle2, Calendar, Users, MapPin, CreditCard, ArrowRight, Printer,
 
 
 interface PendingBooking {
-  name: string;
-  email: string;
-  phone: string;
-  tour: string;
-  date: string;
-  guests: number;
-  hotel: string;
-  message: string;
-  amount: number;
-  orderId: string;
+  name?: string;
+  email?: string;
+  phone?: string;
+  tour?: string;
+  tourName?: string;
+  date?: string;
+  guests?: number;
+  hotel?: string;
+  message?: string;
+  amount?: number;
+  totalAmount?: number;
+  orderId?: string;
 }
-
-
 
 function getGoogleCalendarUrl(booking: PendingBooking | null, orderRef: string) {
   if (!booking) return "#";
-  const tourTitle = booking.tour || (booking as any).tourName || "Wilder Belize Adventure";
+  const tourTitle = booking.tour || booking.tourName || "Wilder Belize Adventure";
   const title = encodeURIComponent(`Wilder Belize Tour: ${tourTitle}`);
   const location = encodeURIComponent(booking.hotel || "Placencia, Belize");
   const details = encodeURIComponent(
@@ -51,44 +51,47 @@ function getGoogleCalendarUrl(booking: PendingBooking | null, orderRef: string) 
 }
 
 export default function SuccessPage() {
-  const [status, setStatus] = useState<"loading" | "success" | "failed">("loading");
+  const [status, setStatus] = useState<"loading" | "success" | "failed">(() => {
+    if (typeof window !== "undefined") {
+      const params = new URLSearchParams(window.location.search);
+      if (!params.get("orderId")) return "success";
+    }
+    return "loading";
+  });
   const [errorMessage, setErrorMessage] = useState("");
-  const [booking, setBooking] = useState<PendingBooking | null>(null);
-  const [orderRef, setOrderRef] = useState("");
-  const [emailSent, setEmailSent] = useState(false);
-
-  useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    const orderId = params.get("orderId");
-
-    // Load saved pending booking from sessionStorage or cookie fallback
+  const [booking, setBooking] = useState<PendingBooking | null>(() => {
+    if (typeof window === "undefined") return null;
     const storedBookingStr = sessionStorage.getItem("pendingBooking");
-    let storedBooking: PendingBooking | null = null;
     if (storedBookingStr) {
       try {
-        storedBooking = JSON.parse(storedBookingStr);
+        return JSON.parse(storedBookingStr);
       } catch (e) {
         console.error("Error parsing pending booking data", e);
       }
     }
-
-    if (!storedBooking && orderId) {
+    const params = new URLSearchParams(window.location.search);
+    const orderId = params.get("orderId");
+    if (orderId) {
       try {
         const match = document.cookie.match(new RegExp(`pendingBooking_${orderId}=([^;]+)`));
         if (match) {
-          storedBooking = JSON.parse(decodeURIComponent(match[1]));
+          return JSON.parse(decodeURIComponent(match[1]));
         }
       } catch (e) {
         console.error("Error parsing cookie backup", e);
       }
     }
+    return null;
+  });
+  const [orderRef, setOrderRef] = useState("");
+  const [_emailSent, setEmailSent] = useState(false);
 
-    if (storedBooking) {
-      setBooking(storedBooking);
-    }
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const orderId = params.get("orderId");
+    const storedBooking = booking;
 
     if (!orderId) {
-      setStatus("success");
       return;
     }
 
@@ -238,7 +241,7 @@ export default function SuccessPage() {
                   </div>
                   <div className="flex items-center justify-between border-b border-ink/5 pb-2">
                     <span className="text-ink-soft">Reservation / Tour</span>
-                    <span className="font-bold text-jungle-800">{booking.tour || (booking as any).tourName || "Wilder Belize Adventure"}</span>
+                    <span className="font-bold text-jungle-800">{booking.tour || booking.tourName || "Wilder Belize Adventure"}</span>
                   </div>
                   <div className="flex items-center justify-between border-b border-ink/5 pb-2">
                     <span className="text-ink-soft flex items-center gap-1.5">
@@ -265,7 +268,7 @@ export default function SuccessPage() {
                       <CreditCard className="h-4 w-4 text-jungle-600" /> Total Paid
                     </span>
                     <span className="font-extrabold text-jungle-700 text-lg">
-                      ${booking.amount || (booking as any).totalAmount || 0} USD
+                      ${booking.amount || booking.totalAmount || 0} USD
                     </span>
                   </div>
                 </div>
