@@ -45,7 +45,7 @@ export function TourCard({ tour, priority = false, className }: { tour: Tour; pr
           </span>
           <span className="rounded-2xl bg-white/95 px-3 py-1.5 text-sm font-extrabold text-ink shadow backdrop-blur flex flex-col items-end leading-tight">
             <span><span className="text-[0.65rem] font-semibold uppercase text-ink-faint">from </span>${tour.price}</span>
-            <span className="text-[0.6rem] font-semibold text-ink-faint whitespace-nowrap">+12.5% GST at checkout</span>
+            <span className="text-[0.6rem] font-semibold text-ink-faint whitespace-nowrap">GST incl.</span>
           </span>
         </div>
       </div>
