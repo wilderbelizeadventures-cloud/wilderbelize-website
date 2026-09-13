@@ -193,8 +193,7 @@ export function InquiryForm({
     setState("loading");
     setError("");
 
-    const subtotalAmount = selectedTour.price * guests;
-    const totalAmount = Number((subtotalAmount * 1.125).toFixed(2));
+    const totalAmount = Number((selectedTour.price * guests).toFixed(2));
 
     console.log("=== [FORM SUBMIT INITIATED] ===", {
       tourName: selectedTour.name,
@@ -504,21 +503,13 @@ export function InquiryForm({
 
               <hr />
 
-              <div className="flex justify-between text-ink-soft">
-                <span>Subtotal</span>
-                <span>${total} USD</span>
+              <div className="flex justify-between text-xs text-ink-soft italic">
+                <span>GST (12.5%) included in price</span>
               </div>
-
-              <div className="flex justify-between text-ink-soft">
-                <span>GST (12.5%)</span>
-                <span>${(total * 0.125).toFixed(2)} USD</span>
-              </div>
-
-              <hr />
 
               <div className="flex justify-between text-lg font-bold text-jungle-700">
                 <span>Total</span>
-                <span>${(total * 1.125).toFixed(2)} USD</span>
+                <span>${total.toFixed(2)} USD</span>
               </div>
             </div>
           </div>

@@ -156,7 +156,7 @@ export function TransferBookingForm({
         },
         body: JSON.stringify({
           tourName: transferTitle,
-          amount: Number((totalPrice * 1.125).toFixed(2)),
+          amount: totalPrice,
           name,
           email,
           phone,
@@ -186,8 +186,8 @@ export function TransferBookingForm({
         name,
         email,
         phone,
-        amount: Number((totalPrice * 1.125).toFixed(2)),
-        totalAmount: Number((totalPrice * 1.125).toFixed(2)),
+        amount: totalPrice,
+        totalAmount: totalPrice,
         orderId: data.orderId,
         orderNumber: data.orderNumber,
         message: `Flight: ${flightNumber || "N/A"}. Children: ${childrenCount}. ${message}`,
@@ -479,21 +479,15 @@ export function TransferBookingForm({
 
           <hr className="my-2 border-jungle-200" />
 
-          <div className="flex justify-between text-ink-soft">
-            <span>Subtotal:</span>
-            <span className="font-semibold">${totalPrice} USD</span>
-          </div>
-
-          <div className="flex justify-between text-ink-soft">
-            <span>GST (12.5%):</span>
-            <span className="font-semibold">${(totalPrice * 0.125).toFixed(2)} USD</span>
+          <div className="flex justify-between text-xs text-ink-soft italic">
+            <span>GST (12.5%) included in price</span>
           </div>
 
           <hr className="my-2 border-jungle-200" />
 
           <div className="flex items-center justify-between text-lg font-extrabold text-jungle-900">
             <span>Total Payable:</span>
-            <span className="text-2xl text-jungle-800">${(totalPrice * 1.125).toFixed(2)} USD</span>
+            <span className="text-2xl text-jungle-800">${totalPrice.toFixed(2)} USD</span>
           </div>
         </div>
       </div>
@@ -510,7 +504,7 @@ export function TransferBookingForm({
         ) : (
           <>
             <CreditCard className="h-5 w-5 shrink-0" />
-            <span>Pay & Book Transfer (${(totalPrice * 1.125).toFixed(2)} USD)</span>
+            <span>Pay & Book Transfer (${totalPrice.toFixed(2)} USD)</span>
             <Check className="h-4 w-4 shrink-0" />
           </>
         )}
@@ -594,7 +588,7 @@ export function TransferBookingForm({
                     {state === "loading" ? (
                       <Loader2 className="h-5 w-5 animate-spin" />
                     ) : (
-                      `Proceed to Pay $${(totalPrice * 1.125).toFixed(2)} USD`
+                      `Proceed to Pay $${totalPrice.toFixed(2)} USD`
                     )}
                   </button>
                 </div>
