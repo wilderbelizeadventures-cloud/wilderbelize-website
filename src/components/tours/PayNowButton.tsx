@@ -21,7 +21,9 @@ export function PayNowButton({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  const totalAmount = Number((amount * guests).toFixed(2));
+  const baseAmount = amount * guests;
+  const gstAmount = baseAmount * 0.125;
+  const totalAmount = Number((baseAmount + gstAmount).toFixed(2));
 
   const handleClick = async () => {
     if (loading) return;

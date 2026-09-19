@@ -166,7 +166,7 @@ const company = {
   tagline: "Your Gateway to Epic Belize Experiences",
   phones: ["+501 650-1003", "+501 671-8828"],
   whatsapp: "5016501003",
-  emails: ["info@wilderbelizeadventures.com", "wilderbelizeadventures@gmail.com"],
+  emails: ["wilderbelizeadventures@gmail.com"],
   address: "Placencia Village, Stann Creek District, Belize",
   socials: {
     facebook: "https://www.facebook.com/wilderbelizeadventures",

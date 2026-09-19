@@ -16,7 +16,7 @@ export function TermsAndConditions() {
           <li>For cancellations 48 hours or more before the scheduled departure, a full refund is available less any non-recoverable third-party costs already paid on the guest&apos;s behalf, such as permits, reserve fees, or equipment rental.</li>
           <li>Cancellations made less than 48 hours before departure are non-refundable. At our sole discretion, a credit toward a future booking may be offered instead.</li>
           <li>No-shows are treated as late cancellations and are non-refundable.</li>
-          <li>Cancellation requests must be submitted in writing to info@wilderbelizeadventures.com.</li>
+          <li>Cancellation requests must be submitted in writing to wilderbelizeadventures@gmail.com.</li>
         </ul>
       </section>
 
@@ -83,7 +83,7 @@ export function TermsAndConditions() {
 
       <section>
         <h2 className="font-display text-lg font-bold text-ink">13. Contact</h2>
-        <p className="mt-2">Questions about these Terms & Conditions or a booking can be sent to info@wilderbelizeadventures.com, or by phone at +501 650-1003.</p>
+        <p className="mt-2">Questions about these Terms & Conditions or a booking can be sent to wilderbelizeadventures@gmail.com, or by phone at +501 650-1003.</p>
       </section>
     </div>
   );

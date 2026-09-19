@@ -634,7 +634,7 @@ function sendWhatsApp(){
 
 function sendEmail(){
   const text = buildSummaryText().replace(/%0A/g,'%0D%0A');
-  window.location.href = `mailto:info@wilderbelizeadventures.com?subject=Booking%20request%20-%20custom%20route&body=${text}`;
+  window.location.href = `mailto:wilderbelizeadventures@gmail.com?subject=Booking%20request%20-%20custom%20route&body=${text}`;
 }
 
 document.getElementById('modalOverlay').addEventListener('click', (e)=>{

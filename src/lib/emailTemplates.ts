@@ -137,6 +137,14 @@ export function generateCustomerReceiptHtml(data: BookingEmailData, refNumber: s
                   <td style="padding: 10px 0; color: #6b7c75; font-weight: 500;">Payment Status</td>
                   <td align="right" style="padding: 10px 0; color: #047857; font-weight: 700;">PAID IN FULL (Belize Bank E-Commerce)</td>
                 </tr>
+                <tr style="border-bottom: 1px solid #edf2f0;">
+                  <td style="padding: 10px 0; color: #6b7c75; font-weight: 500;">Subtotal (Excl. Tax)</td>
+                  <td align="right" style="padding: 10px 0; color: #1c2b26; font-weight: 600;">$${(Number(data.totalAmount || 0) / 1.125).toFixed(2)} USD</td>
+                </tr>
+                <tr style="border-bottom: 1px solid #edf2f0;">
+                  <td style="padding: 10px 0; color: #047857; font-weight: 500;">12.5% GST</td>
+                  <td align="right" style="padding: 10px 0; color: #047857; font-weight: 700;">$${(Number(data.totalAmount || 0) - Number(data.totalAmount || 0) / 1.125).toFixed(2)} USD</td>
+                </tr>
                 <tr>
                   <td style="padding: 14px 0 4px 0; color: #0b3c26; font-size: 16px; font-weight: 800;">Total Amount Paid</td>
                   <td align="right" style="padding: 14px 0 4px 0; color: #0b3c26; font-size: 20px; font-weight: 900;">$${formattedAmount} USD</td>

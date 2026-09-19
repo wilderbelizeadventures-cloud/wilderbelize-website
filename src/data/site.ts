@@ -11,7 +11,6 @@ export const site = {
     ],
     "whatsapp": "5016501003",
     "emails": [
-      "info@wilderbelizeadventures.com",
       "wilderbelizeadventures@gmail.com"
     ],
     "address": "Placencia Village, Stann Creek District, Belize",
