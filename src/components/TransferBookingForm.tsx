@@ -77,7 +77,7 @@ export function TransferBookingForm({
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
-  const [pickupDate, setPickupDate] = useState(() => (typeof window !== "undefined" ? new Date().toISOString().split("T")[0] : ""));
+  const [pickupDate, setPickupDate] = useState("");
   const [returnDate, setReturnDate] = useState("");
   const [adults, setAdults] = useState(2);
   const [childrenCount, setChildrenCount] = useState(0);
@@ -90,7 +90,13 @@ export function TransferBookingForm({
   const [error, setError] = useState("");
   const [termsOpen, setTermsOpen] = useState(false);
   const [termsAccepted, setTermsAccepted] = useState(true);
-  const [today] = useState(() => (typeof window !== "undefined" ? new Date().toISOString().split("T")[0] : ""));
+  const [today, setToday] = useState("");
+
+  useEffect(() => {
+    const todayStr = new Date().toISOString().split("T")[0];
+    setToday(todayStr);
+    setPickupDate((prev) => prev || todayStr);
+  }, []);
 
   if (initialRouteId !== prevInitialRouteId) {
     setPrevInitialRouteId(initialRouteId);
@@ -114,7 +120,9 @@ export function TransferBookingForm({
   const totalGuests = adults;
   const extraGuests = Math.max(0, totalGuests - 4);
   const extraGuestFee = extraGuests * currentRoute.extraGuestPrice;
-  const totalPrice = currentRoute.basePrice + extraGuestFee;
+  const baseTransferPrice = currentRoute.basePrice + extraGuestFee;
+  const gstAmount = Number((baseTransferPrice * 0.125).toFixed(2));
+  const finalTotalPrice = Number((baseTransferPrice + gstAmount).toFixed(2));
 
   function onSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -156,7 +164,7 @@ export function TransferBookingForm({
         },
         body: JSON.stringify({
           tourName: transferTitle,
-          amount: totalPrice,
+          amount: finalTotalPrice,
           name,
           email,
           phone,
@@ -186,8 +194,8 @@ export function TransferBookingForm({
         name,
         email,
         phone,
-        amount: totalPrice,
-        totalAmount: totalPrice,
+        amount: finalTotalPrice,
+        totalAmount: finalTotalPrice,
         orderId: data.orderId,
         orderNumber: data.orderNumber,
         message: `Flight: ${flightNumber || "N/A"}. Children: ${childrenCount}. ${message}`,
@@ -479,15 +487,21 @@ export function TransferBookingForm({
 
           <hr className="my-2 border-jungle-200" />
 
-          <div className="flex justify-between text-xs text-ink-soft italic">
-            <span>GST (12.5%) included in price</span>
+          <div className="flex justify-between text-sm text-ink-soft">
+            <span>Transfer Subtotal:</span>
+            <span className="font-semibold text-ink">${baseTransferPrice.toFixed(2)} USD</span>
+          </div>
+
+          <div className="flex justify-between text-sm text-jungle-700">
+            <span>12.5% GST:</span>
+            <span className="font-semibold">+${gstAmount.toFixed(2)} USD</span>
           </div>
 
           <hr className="my-2 border-jungle-200" />
 
           <div className="flex items-center justify-between text-lg font-extrabold text-jungle-900">
             <span>Total Payable:</span>
-            <span className="text-2xl text-jungle-800">${totalPrice.toFixed(2)} USD</span>
+            <span className="text-2xl text-jungle-800">${finalTotalPrice.toFixed(2)} USD</span>
           </div>
         </div>
       </div>
@@ -504,7 +518,7 @@ export function TransferBookingForm({
         ) : (
           <>
             <CreditCard className="h-5 w-5 shrink-0" />
-            <span>Pay & Book Transfer (${totalPrice.toFixed(2)} USD)</span>
+            <span>Pay & Book Transfer (${finalTotalPrice.toFixed(2)} USD)</span>
             <Check className="h-4 w-4 shrink-0" />
           </>
         )}
@@ -588,7 +602,7 @@ export function TransferBookingForm({
                     {state === "loading" ? (
                       <Loader2 className="h-5 w-5 animate-spin" />
                     ) : (
-                      `Proceed to Pay $${totalPrice.toFixed(2)} USD`
+                      `Proceed to Pay $${finalTotalPrice.toFixed(2)} USD`
                     )}
                   </button>
                 </div>

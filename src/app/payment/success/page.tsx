@@ -51,47 +51,39 @@ function getGoogleCalendarUrl(booking: PendingBooking | null, orderRef: string) 
 }
 
 export default function SuccessPage() {
-  const [status, setStatus] = useState<"loading" | "success" | "failed">(() => {
-    if (typeof window !== "undefined") {
-      const params = new URLSearchParams(window.location.search);
-      if (!params.get("orderId")) return "success";
-    }
-    return "loading";
-  });
+  const [status, setStatus] = useState<"loading" | "success" | "failed">("loading");
   const [errorMessage, setErrorMessage] = useState("");
-  const [booking, setBooking] = useState<PendingBooking | null>(() => {
-    if (typeof window === "undefined") return null;
-    const storedBookingStr = sessionStorage.getItem("pendingBooking");
-    if (storedBookingStr) {
-      try {
-        return JSON.parse(storedBookingStr);
-      } catch (e) {
-        console.error("Error parsing pending booking data", e);
-      }
-    }
-    const params = new URLSearchParams(window.location.search);
-    const orderId = params.get("orderId");
-    if (orderId) {
-      try {
-        const match = document.cookie.match(new RegExp(`pendingBooking_${orderId}=([^;]+)`));
-        if (match) {
-          return JSON.parse(decodeURIComponent(match[1]));
-        }
-      } catch (e) {
-        console.error("Error parsing cookie backup", e);
-      }
-    }
-    return null;
-  });
+  const [booking, setBooking] = useState<PendingBooking | null>(null);
   const [orderRef, setOrderRef] = useState("");
   const [_emailSent, setEmailSent] = useState(false);
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const orderId = params.get("orderId");
-    const storedBooking = booking;
+
+    let initialBooking: PendingBooking | null = null;
+    const storedBookingStr = sessionStorage.getItem("pendingBooking");
+    if (storedBookingStr) {
+      try {
+        initialBooking = JSON.parse(storedBookingStr);
+      } catch (e) {
+        console.error("Error parsing pending booking data", e);
+      }
+    }
+    if (!initialBooking && orderId) {
+      try {
+        const match = document.cookie.match(new RegExp(`pendingBooking_${orderId}=([^;]+)`));
+        if (match) {
+          initialBooking = JSON.parse(decodeURIComponent(match[1]));
+        }
+      } catch (e) {
+        console.error("Error parsing cookie backup", e);
+      }
+    }
+    setBooking(initialBooking);
 
     if (!orderId) {
+      setStatus("success");
       return;
     }
 
@@ -102,7 +94,7 @@ export default function SuccessPage() {
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({ orderId, fallbackBooking: storedBooking }),
+          body: JSON.stringify({ orderId, fallbackBooking: initialBooking }),
         });
 
         const data = await response.json();
@@ -111,7 +103,7 @@ export default function SuccessPage() {
           setStatus("success");
           setOrderRef(data.orderNumber || orderId || "");
 
-          const resolvedBooking: PendingBooking | null = storedBooking || (data.booking ? {
+          const resolvedBooking: PendingBooking | null = initialBooking || (data.booking ? {
             name: data.booking.name,
             email: data.booking.email,
             phone: data.booking.phone,
@@ -142,7 +134,7 @@ export default function SuccessPage() {
       } catch (err) {
         console.error("Verification error:", err);
         // Fallback to success if we have valid stored booking
-        if (storedBooking) {
+        if (initialBooking) {
           setStatus("success");
         } else {
           setStatus("failed");
@@ -263,13 +255,32 @@ export default function SuccessPage() {
                       <span className="font-semibold text-ink">{booking.hotel}</span>
                     </div>
                   )}
-                  <div className="flex items-center justify-between pt-1 text-base">
-                    <span className="font-bold text-ink flex items-center gap-1.5">
-                      <CreditCard className="h-4 w-4 text-jungle-600" /> Total Paid
-                    </span>
-                    <span className="font-extrabold text-jungle-700 text-lg">
-                      ${booking.amount || booking.totalAmount || 0} USD
-                    </span>
+                  <div className="border-t border-ink/5 pt-3 space-y-1.5">
+                    {(() => {
+                      const totalPaid = Number(booking.amount || booking.totalAmount || 0);
+                      const basePrice = totalPaid / 1.125;
+                      const gstAmount = totalPaid - basePrice;
+                      return (
+                        <>
+                          <div className="flex items-center justify-between text-xs text-ink-soft">
+                            <span>Subtotal (Excl. Tax)</span>
+                            <span className="font-semibold text-ink">${basePrice.toFixed(2)} USD</span>
+                          </div>
+                          <div className="flex items-center justify-between text-xs text-jungle-700">
+                            <span>12.5% GST</span>
+                            <span className="font-semibold">${gstAmount.toFixed(2)} USD</span>
+                          </div>
+                          <div className="flex items-center justify-between pt-1 text-base">
+                            <span className="font-bold text-ink flex items-center gap-1.5">
+                              <CreditCard className="h-4 w-4 text-jungle-600" /> Total Paid
+                            </span>
+                            <span className="font-extrabold text-jungle-700 text-lg">
+                              ${totalPaid.toFixed(2)} USD
+                            </span>
+                          </div>
+                        </>
+                      );
+                    })()}
                   </div>
                 </div>
               ) : (

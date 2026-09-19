@@ -50,8 +50,12 @@ export function InquiryForm({
   const [error, setError] = useState("");
   const [termsOpen, setTermsOpen] = useState(false);
   const [termsAccepted, setTermsAccepted] = useState(true);
-  const [today] = useState(() => (typeof window !== "undefined" ? new Date().toISOString().split("T")[0] : ""));
+  const [today, setToday] = useState("");
   const rowCls = cn("grid gap-4", !compact && "sm:grid-cols-2");
+
+  useEffect(() => {
+    setToday(new Date().toISOString().split("T")[0]);
+  }, []);
 
   useEffect(() => {
     if (!termsOpen) return;
@@ -193,7 +197,9 @@ export function InquiryForm({
     setState("loading");
     setError("");
 
-    const totalAmount = Number((selectedTour.price * guests).toFixed(2));
+    const basePrice = selectedTour.price * guests;
+    const gstAmount = Number((basePrice * 0.125).toFixed(2));
+    const totalAmount = Number((basePrice + gstAmount).toFixed(2));
 
     console.log("=== [FORM SUBMIT INITIATED] ===", {
       tourName: selectedTour.name,
@@ -472,7 +478,9 @@ export function InquiryForm({
           tours.find((t) => t.slug === tourIdentifier) ??
           (tourIdentifier ? { name: tourIdentifier, price: 150 } : null);
 
-        const total = (selectedTour?.price ?? 0) * guests;
+        const basePrice = (selectedTour?.price ?? 0) * guests;
+        const gstAmount = Number((basePrice * 0.125).toFixed(2));
+        const totalAmount = Number((basePrice + gstAmount).toFixed(2));
 
         return (
           <div className="rounded-2xl border border-jungle-200 bg-jungle-50 p-4">
@@ -482,34 +490,42 @@ export function InquiryForm({
 
             <div className="space-y-2 text-sm">
               <div className="flex justify-between">
-                <span>Tour</span>
-                <span>{selectedTour?.name}</span>
+                <span className="text-ink-soft">Tour</span>
+                <span className="font-medium text-ink">{selectedTour?.name}</span>
               </div>
 
               <div className="flex justify-between">
-                <span>Date</span>
-                <span>{date || "-"}</span>
+                <span className="text-ink-soft">Date</span>
+                <span className="font-medium text-ink">{date || "-"}</span>
               </div>
 
               <div className="flex justify-between">
-                <span>Guests</span>
-                <span>{guests}</span>
+                <span className="text-ink-soft">Guests</span>
+                <span className="font-medium text-ink">{guests}</span>
               </div>
 
               <div className="flex justify-between">
-                <span>Pickup</span>
-                <span>{hotel || "-"}</span>
+                <span className="text-ink-soft">Pickup</span>
+                <span className="font-medium text-ink">{hotel || "-"}</span>
               </div>
 
-              <hr />
+              <hr className="my-2 border-jungle-200" />
 
-              <div className="flex justify-between text-xs text-ink-soft italic">
-                <span>GST (12.5%) included in price</span>
+              <div className="flex justify-between text-sm text-ink-soft">
+                <span>Tour Subtotal</span>
+                <span className="font-semibold text-ink">${basePrice.toFixed(2)} USD</span>
               </div>
 
-              <div className="flex justify-between text-lg font-bold text-jungle-700">
-                <span>Total</span>
-                <span>${total.toFixed(2)} USD</span>
+              <div className="flex justify-between text-sm text-jungle-700">
+                <span>12.5% GST</span>
+                <span className="font-semibold">+${gstAmount.toFixed(2)} USD</span>
+              </div>
+
+              <hr className="my-2 border-jungle-200" />
+
+              <div className="flex justify-between text-lg font-extrabold text-jungle-900">
+                <span>Total Amount</span>
+                <span>${totalAmount.toFixed(2)} USD</span>
               </div>
             </div>
           </div>

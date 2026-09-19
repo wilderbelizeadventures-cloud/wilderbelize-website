@@ -27,7 +27,18 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
     alternates: {
       canonical: `https://www.wilderbelizeadventures.com/tours/${tour.slug}`,
     },
-    openGraph: { title: tour.name, description: tour.shortDescription, images: [tour.image] },
+    openGraph: {
+      title: tour.name,
+      description: tour.shortDescription,
+      images: [
+        {
+          url: `https://www.wilderbelizeadventures.com${tour.image}`,
+          width: 1200,
+          height: 630,
+          alt: tour.name,
+        },
+      ],
+    },
   };
 }
 
@@ -50,12 +61,25 @@ export default async function TourDetailPage({ params }: { params: Promise<{ slu
   const jsonLd = [
     {
       "@context": "https://schema.org",
-      "@type": "Product",
+      "@type": "TouristTrip",
       name: tour.name,
       description: tour.shortDescription,
       image: `${base}${tour.image}`,
-      category: tour.category,
-      brand: { "@type": "Brand", name: "Wilder Belize Adventures" },
+      touristType: tour.bestFor,
+      itinerary: {
+        "@type": "ItemList",
+        itemListElement: tour.itinerary.map((step, i) => ({
+          "@type": "ListItem",
+          position: i + 1,
+          name: step.title,
+          description: step.detail,
+        })),
+      },
+      provider: {
+        "@type": "TravelAgency",
+        name: "Wilder Belize Adventures",
+        url: base,
+      },
       offers: {
         "@type": "Offer",
         price: tour.price,
