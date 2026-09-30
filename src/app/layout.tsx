@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from "next";
+import Script from "next/script";
 import { Bricolage_Grotesque, Plus_Jakarta_Sans } from "next/font/google";
 import "./globals.css";
 import { Navbar } from "@/components/Navbar";
@@ -132,6 +133,21 @@ export default function RootLayout({
 
   return (
     <html lang="en" className={`${display.variable} ${body.variable} h-full antialiased overflow-x-hidden`}>
+      <head>
+        <Script
+          src="https://www.googletagmanager.com/gtag/js?id=AW-17675419265"
+          strategy="afterInteractive"
+        />
+        <Script id="google-ads-gtag" strategy="afterInteractive">
+          {`
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+
+            gtag('config', 'AW-17675419265');
+          `}
+        </Script>
+      </head>
       <body className="flex min-h-full flex-col overflow-x-hidden">
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(orgLd) }} />
         <Navbar />
