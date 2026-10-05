@@ -14,6 +14,7 @@ type SmartImageProps = {
   imgClassName?: string;
   sizes?: string;
   priority?: boolean;
+  quality?: number;
 };
 
 /** next/image with a graceful gradient fallback if the file is missing. */
@@ -23,8 +24,9 @@ export function SmartImage({
   theme = "jungle-hike",
   className,
   imgClassName,
-  sizes = "100vw",
+  sizes = "(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw",
   priority = false,
+  quality = 75,
 }: SmartImageProps) {
   const [error, setError] = useState(false);
 
@@ -41,6 +43,9 @@ export function SmartImage({
           fill
           sizes={sizes}
           priority={priority}
+          quality={quality}
+          loading={priority ? "eager" : "lazy"}
+          decoding="async"
           onError={() => setError(true)}
           className={cn("object-cover", imgClassName)}
         />
