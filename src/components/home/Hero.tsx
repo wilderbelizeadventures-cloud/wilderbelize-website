@@ -50,14 +50,29 @@ const letterReveal = {
 export function Hero() {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [videoLoaded, setVideoLoaded] = useState(false);
+  const [videoSrc, setVideoSrc] = useState<string | null>(null);
   const reduce = useReducedMotion();
   const { scrollY } = useScroll();
   const y = useTransform(scrollY, [0, 700], [0, 160]);
   const fade = useTransform(scrollY, [0, 420], [1, 0]);
 
   useEffect(() => {
+    if (reduce) return;
+
+    const isDesktop = window.innerWidth >= 768;
+    if (isDesktop) {
+      setVideoSrc("/images/belize-background-web.mp4");
+    } else {
+      const timer = setTimeout(() => {
+        setVideoSrc("/images/belize-background-web.mp4");
+      }, 2500);
+      return () => clearTimeout(timer);
+    }
+  }, [reduce]);
+
+  useEffect(() => {
     const video = videoRef.current;
-    if (!video) return;
+    if (!video || !videoSrc) return;
 
     video.defaultMuted = true;
     video.muted = true;
@@ -67,30 +82,25 @@ export function Hero() {
     video.setAttribute("webkit-playsinline", "");
     video.setAttribute("x-webkit-airplay", "deny");
 
-    const isMobile = typeof window !== "undefined" && window.innerWidth < 768;
-
     const playVideo = () => {
       if (!document.hidden && video) {
         void video.play().catch(() => undefined);
       }
     };
 
-    const timer = setTimeout(() => {
-      playVideo();
-    }, isMobile ? 1800 : 300);
-
     video.addEventListener("loadeddata", () => setVideoLoaded(true));
     video.addEventListener("canplay", playVideo);
     document.addEventListener("visibilitychange", playVideo);
     window.addEventListener("pageshow", playVideo);
 
+    playVideo();
+
     return () => {
-      clearTimeout(timer);
       video.removeEventListener("canplay", playVideo);
       document.removeEventListener("visibilitychange", playVideo);
       window.removeEventListener("pageshow", playVideo);
     };
-  }, []);
+  }, [videoSrc]);
 
   return (
     <section className="relative flex min-h-[100svh] items-center overflow-hidden">
@@ -109,24 +119,26 @@ export function Hero() {
           />
 
           {/* Hardware-accelerated native video that fades in once buffered */}
-          <video
-            ref={videoRef}
-            className={`hero-background-video pointer-events-none absolute inset-0 h-full w-full object-cover transition-opacity duration-1000 ${
-              videoLoaded ? "opacity-100" : "opacity-0"
-            }`}
-            muted
-            loop
-            playsInline
-            disablePictureInPicture
-            disableRemotePlayback
-            controlsList="nodownload nofullscreen noplaybackrate"
-            preload="metadata"
-            tabIndex={-1}
-            onPlaying={() => setVideoLoaded(true)}
-            aria-hidden="true"
-          >
-            <source src="/images/belize-background-web.mp4" type="video/mp4" />
-          </video>
+          {videoSrc && (
+            <video
+              ref={videoRef}
+              className={`hero-background-video pointer-events-none absolute inset-0 h-full w-full object-cover transition-opacity duration-1000 ${
+                videoLoaded ? "opacity-100" : "opacity-0"
+              }`}
+              muted
+              loop
+              playsInline
+              disablePictureInPicture
+              disableRemotePlayback
+              controlsList="nodownload nofullscreen noplaybackrate"
+              preload="metadata"
+              tabIndex={-1}
+              onPlaying={() => setVideoLoaded(true)}
+              aria-hidden="true"
+            >
+              <source src={videoSrc} type="video/mp4" />
+            </video>
+          )}
         </div>
         <div className="absolute inset-0 bg-gradient-to-b from-ink/70 via-ink/35 to-ink/85" />
       </motion.div>

@@ -8,6 +8,7 @@ import { SectionHeading } from "@/components/SectionHeading";
 import { Reveal, Stagger, StaggerItem } from "@/components/Reveal";
 import { TourCard } from "@/components/TourCard";
 import { SmartImage } from "@/components/SmartImage";
+import { LazyVideo } from "@/components/LazyVideo";
 import { site } from "@/data/site";
 import { featuredTours, fullDayTours, halfDayTours, multiDayTours, allInterests } from "@/data/tours";
 import { HERO_IMAGES, MISC_IMAGES } from "@/lib/images";
@@ -109,20 +110,10 @@ export default function HomePage() {
       <section className="section bg-jungle-950 text-white">
         <div className="container-page grid items-center gap-12 lg:grid-cols-2">
           <Reveal>
-            <div className="overflow-hidden rounded-3xl shadow-lift">
-              <video
-                className="aspect-[4/3] w-full object-cover"
-                muted
-                loop
-                playsInline
-                controls
-                preload="none"
-                poster="/images/heroes/hero-waterfall.jpg"
-              >
-                <source src="/videos/wilder-website-cinematic.mp4" type="video/mp4" />
-                Your browser does not support the video tag.
-              </video>
-            </div>
+            <LazyVideo
+              src="/videos/wilder-website-cinematic.mp4"
+              poster="/images/heroes/hero-waterfall.jpg"
+            />
           </Reveal>
           <Reveal>
             <div>

@@ -30,11 +30,11 @@ export const metadata: Metadata = {
   },
   icons: {
     icon: [
-      { url: "/favicon.ico", type: "image/x-icon" },
-      { url: "/belize_new_logo.png", type: "image/png" },
+      { url: "/favicon.ico?v=2", type: "image/x-icon" },
+      { url: "/belize_new_logo.png?v=2", type: "image/png" },
     ],
-    shortcut: "/favicon.ico",
-    apple: "/belize_new_logo.png",
+    shortcut: "/favicon.ico?v=2",
+    apple: "/belize_new_logo.png?v=2",
   },
   robots: {
     index: true,
