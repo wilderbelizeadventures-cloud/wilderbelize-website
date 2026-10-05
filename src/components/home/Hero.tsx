@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 import { motion, useScroll, useTransform, useReducedMotion } from "framer-motion";
 import { ArrowRight, Star, MapPin, ChevronDown, MessageCircle } from "lucide-react";
@@ -48,8 +49,7 @@ const letterReveal = {
 
 export function Hero() {
   const videoRef = useRef<HTMLVideoElement>(null);
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-  const [useCanvasVideo, setUseCanvasVideo] = useState(true);
+  const [videoLoaded, setVideoLoaded] = useState(false);
   const reduce = useReducedMotion();
   const { scrollY } = useScroll();
   const y = useTransform(scrollY, [0, 700], [0, 160]);
@@ -58,11 +58,6 @@ export function Hero() {
   useEffect(() => {
     const video = videoRef.current;
     if (!video) return;
-
-    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
-    const isSafari = /^((?!chrome|android|crios|fxios).)*safari/i.test(navigator.userAgent);
-    const shouldUseCanvas = isIOS || isSafari;
-    setUseCanvasVideo(shouldUseCanvas);
 
     video.defaultMuted = true;
     video.muted = true;
@@ -74,72 +69,17 @@ export function Hero() {
 
     const playVideo = () => {
       if (!document.hidden) {
-        window.requestAnimationFrame(() => {
-          void video.play().catch(() => undefined);
-        });
+        void video.play().catch(() => undefined);
       }
     };
 
     playVideo();
-    video.addEventListener("loadeddata", playVideo);
+    video.addEventListener("loadeddata", () => setVideoLoaded(true));
     video.addEventListener("canplay", playVideo);
     document.addEventListener("visibilitychange", playVideo);
     window.addEventListener("pageshow", playVideo);
 
-    let frame = 0;
-
-    if (shouldUseCanvas) {
-      const canvas = canvasRef.current;
-      const context = canvas?.getContext("2d");
-
-      const resizeCanvas = () => {
-        if (!canvas) return;
-        const rect = canvas.getBoundingClientRect();
-        const ratio = window.devicePixelRatio || 1;
-        canvas.width = Math.max(1, Math.round(rect.width * ratio));
-        canvas.height = Math.max(1, Math.round(rect.height * ratio));
-      };
-
-      const drawVideo = () => {
-        if (canvas && context && video.readyState >= 2) {
-          const videoRatio = video.videoWidth / video.videoHeight;
-          const canvasRatio = canvas.width / canvas.height;
-          let drawWidth = canvas.width;
-          let drawHeight = canvas.height;
-          let drawX = 0;
-          let drawY = 0;
-
-          if (videoRatio > canvasRatio) {
-            drawWidth = canvas.height * videoRatio;
-            drawX = (canvas.width - drawWidth) / 2;
-          } else {
-            drawHeight = canvas.width / videoRatio;
-            drawY = (canvas.height - drawHeight) / 2;
-          }
-
-          context.drawImage(video, drawX, drawY, drawWidth, drawHeight);
-        }
-
-        frame = window.requestAnimationFrame(drawVideo);
-      };
-
-      resizeCanvas();
-      window.addEventListener("resize", resizeCanvas);
-      frame = window.requestAnimationFrame(drawVideo);
-
-      return () => {
-        window.cancelAnimationFrame(frame);
-        window.removeEventListener("resize", resizeCanvas);
-        video.removeEventListener("loadeddata", playVideo);
-        video.removeEventListener("canplay", playVideo);
-        document.removeEventListener("visibilitychange", playVideo);
-        window.removeEventListener("pageshow", playVideo);
-      };
-    }
-
     return () => {
-      window.cancelAnimationFrame(frame);
-      video.removeEventListener("loadeddata", playVideo);
       video.removeEventListener("canplay", playVideo);
       document.removeEventListener("visibilitychange", playVideo);
       window.removeEventListener("pageshow", playVideo);
@@ -150,19 +90,24 @@ export function Hero() {
     <section className="relative flex min-h-[100svh] items-center overflow-hidden">
       {/* Background */}
       <motion.div style={reduce ? undefined : { y }} className="absolute inset-0 z-0">
-        <motion.div
-          className="absolute inset-0"
-          animate={reduce ? undefined : { scale: [1, 1.12] }}
-          transition={{ duration: 22, repeat: Infinity, repeatType: "reverse", ease: "easeInOut" }}
-        >
-          <canvas
-            ref={canvasRef}
-            className={`absolute inset-0 h-full w-full ${useCanvasVideo ? "block" : "hidden"}`}
-            aria-hidden="true"
+        <div className="absolute inset-0 overflow-hidden">
+          {/* Instant hero poster so mobile never sees a blank screen */}
+          <Image
+            src="/images/heroes/hero-coast.jpg"
+            alt="Wilder Belize Adventures"
+            fill
+            priority
+            fetchPriority="high"
+            sizes="100vw"
+            className="object-cover"
           />
+
+          {/* Hardware-accelerated native video that fades in once buffered */}
           <video
             ref={videoRef}
-            className={`hero-background-video pointer-events-none absolute inset-0 h-full w-full object-cover ${useCanvasVideo ? "opacity-0" : "opacity-100"}`}
+            className={`hero-background-video pointer-events-none absolute inset-0 h-full w-full object-cover transition-opacity duration-1000 ${
+              videoLoaded ? "opacity-100" : "opacity-0"
+            }`}
             autoPlay
             muted
             loop
@@ -170,27 +115,15 @@ export function Hero() {
             disablePictureInPicture
             disableRemotePlayback
             controlsList="nodownload nofullscreen noplaybackrate"
-            preload="auto"
+            preload="metadata"
             tabIndex={-1}
-            onLoadedMetadata={(event) => {
-              event.currentTarget.defaultMuted = true;
-              event.currentTarget.muted = true;
-              event.currentTarget.setAttribute("muted", "");
-              event.currentTarget.setAttribute("playsinline", "");
-              event.currentTarget.setAttribute("webkit-playsinline", "");
-              event.currentTarget.setAttribute("x-webkit-airplay", "deny");
-              void event.currentTarget.play().catch(() => undefined);
-            }}
-            onCanPlay={(event) => {
-              void event.currentTarget.play().catch(() => undefined);
-            }}
+            onPlaying={() => setVideoLoaded(true)}
             aria-hidden="true"
           >
             <source src="/images/belize-background-web.mp4" type="video/mp4" />
           </video>
-        </motion.div>
+        </div>
         <div className="absolute inset-0 bg-gradient-to-b from-ink/70 via-ink/35 to-ink/85" />
-        {/* <div className="absolute inset-x-0 bottom-0 h-12 bg-gradient-to-t from-sand-50 to-transparent" /> smoke effect */}
       </motion.div>
 
       {/* Content */}

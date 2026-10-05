@@ -2,7 +2,16 @@
 
 import { useState, useSyncExternalStore } from "react";
 import { MessageCircle, X } from "lucide-react";
-import ChatWindow from "./ChatWindow";
+import dynamic from "next/dynamic";
+
+const ChatWindow = dynamic(() => import("./ChatWindow"), {
+  ssr: false,
+  loading: () => (
+    <div className="flex h-full items-center justify-center p-8 text-sm text-gray-400">
+      Loading assistant...
+    </div>
+  ),
+});
 
 const emptySubscribe = () => () => {};
 
