@@ -72,7 +72,7 @@ export async function POST(req: NextRequest) {
     const reqOrigin = req.headers.get("origin") || req.nextUrl.origin;
     let baseUrl = reqOrigin || process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000";
 
-    if (baseUrl.includes(".vercel.app")) {
+    if (baseUrl.includes(".vercel.app") || baseUrl.includes("wilderbelizeadventures.com")) {
       baseUrl = "https://www.wilderbelizeadventures.com";
     }
 
