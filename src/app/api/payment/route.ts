@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { storePendingBooking } from "@/lib/bookingStore";
+import { storePendingBooking, encodeBookingToken } from "@/lib/bookingStore";
 
 export async function POST(req: NextRequest) {
   const startTime = Date.now();
@@ -79,13 +79,31 @@ export async function POST(req: NextRequest) {
     const amountInCents = String(Math.round(Number(amount) * 100));
     const targetUrl = `${bblBaseUrl}/register.do`;
 
+    const bookingToken = encodeBookingToken({
+      name: typeof name === "string" ? name : "Valued Guest",
+      email: typeof email === "string" ? email : "",
+      phone: typeof phone === "string" ? phone : "",
+      tourName: typeof tourName === "string" ? tourName : "Wilder Belize Adventure",
+      date: typeof date === "string" ? date : "",
+      guests: Number(guests) || 1,
+      hotel: typeof hotel === "string" ? hotel : "",
+      message: typeof message === "string" ? message : "",
+      totalAmount: Number(amount) || 0,
+      orderNumber,
+      createdAt: Date.now(),
+    });
+
+    const returnUrl = bookingToken
+      ? `${baseUrl}/payment/success?bdata=${bookingToken}`
+      : `${baseUrl}/payment/success`;
+
     // 2. Construct Payload according to Belize Bank Integration Guide v1.3 Page 11
     const params = new URLSearchParams();
     params.append("userName", bblUsername);
     params.append("password", bblPassword);
     params.append("amount", amountInCents);
     params.append("description", String(tourName || "Wilder Belize Adventure"));
-    params.append("returnUrl", `${baseUrl}/payment/success`);
+    params.append("returnUrl", returnUrl);
     params.append("orderNumber", orderNumber);
     params.append("currency", process.env.BBL_CURRENCY || "840");
 
@@ -155,7 +173,7 @@ export async function POST(req: NextRequest) {
 
         return NextResponse.json({
           success: true,
-          paymentUrl: `${baseUrl}/payment/success?orderId=${sandboxOrderId}`,
+          paymentUrl: `${baseUrl}/payment/success?orderId=${sandboxOrderId}${bookingToken ? `&bdata=${bookingToken}` : ""}`,
           orderId: sandboxOrderId,
           orderNumber,
           isSandboxMode: true,

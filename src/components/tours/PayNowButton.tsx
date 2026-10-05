@@ -9,6 +9,9 @@ interface PayNowButtonProps {
   guests?: number;
   label?: string;
   className?: string;
+  customerName?: string;
+  customerEmail?: string;
+  customerPhone?: string;
 }
 
 export function PayNowButton({
@@ -17,6 +20,9 @@ export function PayNowButton({
   guests = 1,
   label = "Pay & Book Now",
   className,
+  customerName = "Valued Guest",
+  customerEmail = "",
+  customerPhone = "",
 }: PayNowButtonProps) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -42,6 +48,9 @@ export function PayNowButton({
           tourName,
           amount: totalAmount,
           guests,
+          name: customerName,
+          email: customerEmail,
+          phone: customerPhone,
         }),
       });
 
@@ -60,9 +69,9 @@ export function PayNowButton({
         totalAmount: totalAmount,
         orderId: data.orderId,
         orderNumber: data.orderNumber,
-        name: "Valued Guest",
-        email: "",
-        phone: "",
+        name: customerName,
+        email: customerEmail,
+        phone: customerPhone,
         date: "To be scheduled",
         hotel: "Not specified",
         message: "Booked via Direct Pay Now button",

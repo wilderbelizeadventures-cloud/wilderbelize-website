@@ -199,7 +199,7 @@ export async function POST(request: Request) {
   // Send emails via Resend
   const resendApiKey = process.env.RESEND_API_KEY;
   const recipientEmail = process.env.NEXT_PUBLIC_RECIPIENT_EMAIL || "wilderbelizeadventures@gmail.com";
-  const fromEmail = process.env.RESEND_FROM_EMAIL || "Wilder Belize Adventures <onboarding@resend.dev>";
+  const fromEmail = process.env.RESEND_FROM_EMAIL || "Wilder Belize Adventures <bookings@wilderbelizeadventures.com>";
 
   if (resendApiKey) {
     try {

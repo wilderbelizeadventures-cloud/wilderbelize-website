@@ -16,6 +16,27 @@ export interface BookingData {
   createdAt: number;
 }
 
+export function encodeBookingToken(booking: Partial<BookingData>): string {
+  try {
+    const jsonStr = JSON.stringify(booking);
+    return Buffer.from(jsonStr, "utf8").toString("base64url");
+  } catch (e) {
+    console.error("[bookingStore] Failed to encode booking token:", e);
+    return "";
+  }
+}
+
+export function decodeBookingToken(token: string): BookingData | null {
+  try {
+    if (!token) return null;
+    const jsonStr = Buffer.from(token, "base64url").toString("utf8");
+    return JSON.parse(jsonStr) as BookingData;
+  } catch (e) {
+    console.warn("[bookingStore] Failed to decode booking token:", e);
+    return null;
+  }
+}
+
 const FILE_PATH = path.join(process.cwd(), "data", "pendingBookings.json");
 
 function readDiskStore(): Record<string, BookingData> {

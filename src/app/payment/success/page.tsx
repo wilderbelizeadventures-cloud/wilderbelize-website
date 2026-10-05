@@ -60,16 +60,31 @@ export default function SuccessPage() {
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const orderId = params.get("orderId");
+    const bdata = params.get("bdata");
 
     let initialBooking: PendingBooking | null = null;
-    const storedBookingStr = sessionStorage.getItem("pendingBooking");
-    if (storedBookingStr) {
+
+    if (bdata) {
       try {
-        initialBooking = JSON.parse(storedBookingStr);
+        const base64 = bdata.replace(/-/g, "+").replace(/_/g, "/");
+        const jsonStr = decodeURIComponent(escape(atob(base64)));
+        initialBooking = JSON.parse(jsonStr);
       } catch (e) {
-        console.error("Error parsing pending booking data", e);
+        console.error("Error decoding bdata query parameter", e);
       }
     }
+
+    if (!initialBooking) {
+      const storedBookingStr = sessionStorage.getItem("pendingBooking");
+      if (storedBookingStr) {
+        try {
+          initialBooking = JSON.parse(storedBookingStr);
+        } catch (e) {
+          console.error("Error parsing pending booking data", e);
+        }
+      }
+    }
+
     if (!initialBooking && orderId) {
       try {
         const match = document.cookie.match(new RegExp(`pendingBooking_${orderId}=([^;]+)`));
@@ -94,7 +109,7 @@ export default function SuccessPage() {
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({ orderId, fallbackBooking: initialBooking }),
+          body: JSON.stringify({ orderId, bdata, fallbackBooking: initialBooking }),
         });
 
         const data = await response.json();

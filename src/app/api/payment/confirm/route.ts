@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getPendingBooking, BookingData } from "@/lib/bookingStore";
+import { getPendingBooking, BookingData, decodeBookingToken } from "@/lib/bookingStore";
 import nodemailer from "nodemailer";
 import { generateCustomerReceiptHtml, generateOwnerOrderAlertHtml } from "@/lib/emailTemplates";
 import { Resend } from "resend";
@@ -57,7 +57,7 @@ async function sendServerBookingEmail(
     try {
       console.log(`[RESEND EMAIL] Dispatching payment emails via Resend API...`);
       const resend = new Resend(resendApiKey);
-      const fromEmail = process.env.RESEND_FROM_EMAIL || "Wilder Belize Adventures <onboarding@resend.dev>";
+      const fromEmail = process.env.RESEND_FROM_EMAIL || "Wilder Belize Adventures <bookings@wilderbelizeadventures.com>";
 
       // Send 1: Owner / Founder Alert
       let ownerRes = await resend.emails.send({
@@ -67,48 +67,45 @@ async function sendServerBookingEmail(
         html: ownerHtml,
       });
 
-      // Fallback to onboarding@resend.dev if custom domain sending fails or errors
-      if (ownerRes.error) {
-        console.warn(`[RESEND WARN] Primary fromEmail (${fromEmail}) failed (${ownerRes.error.message}). Retrying with onboarding@resend.dev...`);
-        ownerRes = await resend.emails.send({
-          from: "Wilder Belize Adventures <onboarding@resend.dev>",
-          to: recipientEmail,
-          subject: ownerSubject,
-          html: ownerHtml,
-        });
-      }
-
       if (ownerRes.data) {
         wilderNotified = true;
         console.log(`[RESEND SUCCESS] Owner email sent to ${recipientEmail} (ID: ${ownerRes.data.id})`);
       } else {
         console.error(`[RESEND ERROR] Owner email dispatch failed:`, ownerRes.error);
+        // Fallback retry for owner alert only
+        if (ownerRes.error) {
+          console.warn(`[RESEND WARN] Primary fromEmail (${fromEmail}) failed (${ownerRes.error.message}). Retrying owner alert with onboarding@resend.dev...`);
+          const fallbackRes = await resend.emails.send({
+            from: "Wilder Belize Adventures <onboarding@resend.dev>",
+            to: recipientEmail,
+            subject: ownerSubject,
+            html: ownerHtml,
+          });
+          if (fallbackRes.data) {
+            wilderNotified = true;
+            console.log(`[RESEND SUCCESS] Owner email sent via fallback to ${recipientEmail}`);
+          }
+        }
       }
 
       // Send 2: Customer Confirmation Receipt
       if (bookingData.email) {
-        let customerRes = await resend.emails.send({
+        console.log(`[RESEND EMAIL] Dispatching customer receipt to ${bookingData.email}...`);
+        const customerRes = await resend.emails.send({
           from: fromEmail,
           to: bookingData.email,
           subject: customerSubject,
           html: customerHtml,
         });
 
-        if (customerRes.error) {
-          customerRes = await resend.emails.send({
-            from: "Wilder Belize Adventures <onboarding@resend.dev>",
-            to: bookingData.email,
-            subject: customerSubject,
-            html: customerHtml,
-          });
-        }
-
         if (customerRes.data) {
           customerNotified = true;
           console.log(`[RESEND SUCCESS] Customer receipt sent to ${bookingData.email} (ID: ${customerRes.data.id})`);
         } else {
-          console.error(`[RESEND ERROR] Customer email failed:`, customerRes.error);
+          console.error(`[RESEND ERROR] Customer receipt dispatch failed:`, customerRes.error);
         }
+      } else {
+        console.warn(`[RESEND WARN] No customer email provided for order ${refNumber}. Customer receipt skipped.`);
       }
 
       if (wilderNotified || customerNotified) {
@@ -188,7 +185,7 @@ async function sendServerBookingEmail(
 export async function POST(req: NextRequest) {
   try {
     const reqBody = await req.json();
-    const { orderId, fallbackBooking } = reqBody;
+    const { orderId, bdata, fallbackBooking } = reqBody;
 
     if (!orderId) {
       return NextResponse.json(
@@ -201,7 +198,8 @@ export async function POST(req: NextRequest) {
     const bblUsername = process.env.BBL_USERNAME || "Wilder_Belize_Adventures-api";
     const bblPassword = process.env.BBL_PASSWORD || "WilderB3lize2027!";
 
-    const storedBooking = getPendingBooking(orderId) || fallbackBooking;
+    const decodedBooking = bdata ? decodeBookingToken(bdata) : null;
+    const storedBooking = decodedBooking || getPendingBooking(orderId) || fallbackBooking;
 
     const params = new URLSearchParams();
     params.append("userName", bblUsername);
@@ -244,23 +242,23 @@ export async function POST(req: NextRequest) {
 
     const refNumber = payment.orderNumber || orderId;
 
-    // Construct robust fallback booking data if client/server memory lost the booking state
-    const bookingToNotify: BookingData = storedBooking || {
+    // Construct robust merged booking data ensuring customer email & details are preserved
+    const bookingToNotify: BookingData = {
       orderId: String(orderId),
       orderNumber: refNumber,
-      name: payment.cardAuthInfo?.cardholderName || "Valued Guest",
-      email: payment.email || "",
-      phone: "",
-      tourName: payment.description || "Wilder Belize Adventure",
-      date: "Check Belize Bank Merchant Portal",
-      guests: 1,
-      hotel: "Placencia, Belize",
-      message: `Paid via Belize Bank Gateway. Order: ${refNumber}. Approval Code: ${payment.cardAuthInfo?.approvalCode || "N/A"}`,
-      totalAmount: payment.amount ? payment.amount / 100 : 0,
-      createdAt: Date.now(),
+      name: storedBooking?.name || payment.cardAuthInfo?.cardholderName || "Valued Guest",
+      email: storedBooking?.email || payment.email || "",
+      phone: storedBooking?.phone || "",
+      tourName: storedBooking?.tourName || payment.description || "Wilder Belize Adventure",
+      date: storedBooking?.date || "To be scheduled",
+      guests: Number(storedBooking?.guests) || 1,
+      hotel: storedBooking?.hotel || "Placencia, Belize",
+      message: storedBooking?.message || `Paid via Belize Bank Gateway. Order: ${refNumber}. Approval Code: ${payment.cardAuthInfo?.approvalCode || "N/A"}`,
+      totalAmount: Number(storedBooking?.totalAmount) || (payment.amount ? payment.amount / 100 : 0),
+      createdAt: storedBooking?.createdAt || Date.now(),
     };
 
-    // Send primary authoritative email server-side strictly after approved verification
+    console.log(`[CONFIRM DISPATCH] Dispatching emails for order ${refNumber} (Guest: ${bookingToNotify.name}, Email: ${bookingToNotify.email || "NONE"})`);
     const emailResult = await sendServerBookingEmail(bookingToNotify, refNumber);
 
     return NextResponse.json({
