@@ -50,7 +50,7 @@ export default function HomePage() {
               .slice(0, 6)
               .map((tour, i) => (
                 <StaggerItem key={tour.slug} className="h-full">
-                  <TourCard tour={tour} priority={i < 3} className="h-full" />
+                  <TourCard tour={tour} priority={false} className="h-full" />
                 </StaggerItem>
               ))}
           </Stagger>

@@ -18,35 +18,6 @@ const QUICK: { label: string; interest: string }[] = [
 const headlineWords = ["Welcome", "to", "Wilder", "Belize"];
 const headlinePhrase = "Adventures Tours and Transfers!";
 
-const wordReveal = {
-  hidden: { opacity: 0, y: 36, filter: "blur(14px)" },
-  show: (i: number) => ({
-    opacity: 1,
-    y: 0,
-    filter: "blur(0px)",
-    transition: {
-      delay: 0.28 + i * 0.09,
-      duration: 0.72,
-      ease: [0.22, 1, 0.36, 1] as const,
-    },
-  }),
-};
-
-const letterReveal = {
-  hidden: { opacity: 0, y: 28, rotateX: -62, filter: "blur(5px)" },
-  show: (i: number) => ({
-    opacity: 1,
-    y: 0,
-    rotateX: 0,
-    filter: "blur(0px)",
-    transition: {
-      delay: 0.72 + i * 0.022,
-      duration: 0.58,
-      ease: [0.22, 1, 0.36, 1] as const,
-    },
-  }),
-};
-
 export function Hero() {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [videoLoaded, setVideoLoaded] = useState(false);
@@ -144,13 +115,8 @@ export function Hero() {
       </motion.div>
 
       {/* Content */}
-      <motion.div style={reduce ? undefined : { opacity: fade }} className="container-page relative z-10 w-full pb-24 pt-32 md:pb-28">
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
-          className="max-w-4xl lg:max-w-5xl"
-        >
+      <div className="container-page relative z-10 w-full pb-24 pt-32 md:pb-28">
+        <div className="max-w-4xl lg:max-w-5xl">
           <span className="inline-flex items-center gap-2 rounded-full bg-white/10 px-4 py-1.5 text-xs font-bold uppercase tracking-[0.18em] text-white backdrop-blur ring-1 ring-white/20">
             <MapPin className="h-3.5 w-3.5 text-coral-300" /> {site.hero.kicker}
           </span>
@@ -159,55 +125,14 @@ export function Hero() {
             aria-label="Welcome to Wilder Belize Adventures Tours and Transfers!"
             className="mt-6 font-display text-4xl font-extrabold leading-[0.98] text-white drop-shadow-sm sm:text-6xl md:text-7xl lg:text-[4.5rem] xl:text-[5.2rem]"
           >
-            <span aria-hidden="true" className="block overflow-hidden pb-1">
-              {headlineWords.map((word, i) => (
-                <motion.span
-                  key={word}
-                  custom={i}
-                  initial={reduce ? false : "hidden"}
-                  animate={reduce ? undefined : "show"}
-                  variants={wordReveal}
-                  className="inline-block will-change-transform"
-                >
-                  {word}
-                  {i < headlineWords.length - 1 ? "\u00A0" : ""}
-                </motion.span>
-              ))}
+            <span className="block pb-1">
+              {headlineWords.join(" ")}
             </span>
-            <motion.span
-              aria-hidden="true"
-              initial={reduce ? false : { opacity: 0.9 }}
-              animate={reduce ? undefined : { opacity: 1, textShadow: ["0 0 0 rgba(255,165,79,0)", "0 0 22px rgba(255,165,79,0.28)", "0 0 0 rgba(255,165,79,0)"] }}
-              transition={{ delay: 1.25, duration: 4.8, repeat: Infinity, ease: "easeInOut" }}
-              className="block origin-left overflow-hidden pb-2 pt-1 [perspective:900px]"
-            >
-              {headlinePhrase.split(" ").map((word, wordIndex, wordsArr) => {
-                let charOffset = 0;
-                for (let w = 0; w < wordIndex; w++) {
-                  charOffset += wordsArr[w].length + 1;
-                }
-                return (
-                  <span key={wordIndex} className="inline-block whitespace-nowrap">
-                    {word.split("").map((char, charIndex) => {
-                      const globalIndex = charOffset + charIndex;
-                      return (
-                        <motion.span
-                          key={`${char}-${charIndex}`}
-                          custom={globalIndex}
-                          initial={reduce ? false : "hidden"}
-                          animate={reduce ? undefined : "show"}
-                          variants={letterReveal}
-                          className="inline-block bg-gradient-to-r from-coral-300 via-gold-300 to-lagoon-200 bg-[length:220%_220%] bg-clip-text text-transparent animate-gradient will-change-transform"
-                        >
-                          {char}
-                        </motion.span>
-                      );
-                    })}
-                    {wordIndex < wordsArr.length - 1 && <span className="inline-block">&nbsp;</span>}
-                  </span>
-                );
-              })}
-            </motion.span>
+            <span className="block origin-left overflow-hidden pb-2 pt-1">
+              <span className="inline-block bg-gradient-to-r from-coral-300 via-gold-300 to-lagoon-200 bg-[length:220%_220%] bg-clip-text text-transparent animate-gradient">
+                {headlinePhrase}
+              </span>
+            </span>
           </h1>
 
           <p className="mt-6 max-w-xl text-lg leading-relaxed text-white/85 md:text-xl">{site.hero.subheadline}</p>
@@ -245,8 +170,8 @@ export function Hero() {
             <div className="h-8 w-px bg-white/20" />
             <div className="text-sm text-white/85"><span className="font-bold text-white">8+</span> years in the wild</div>
           </div>
-        </motion.div>
-      </motion.div>
+        </div>
+      </div>
 
       {/* Scroll cue */}
       <motion.div
