@@ -112,11 +112,11 @@ export default function HomePage() {
             <div className="overflow-hidden rounded-3xl shadow-lift">
               <video
                 className="aspect-[4/3] w-full object-cover"
-                autoPlay
                 muted
                 loop
                 playsInline
                 controls
+                preload="none"
                 poster="/images/heroes/hero-waterfall.jpg"
               >
                 <source src="/videos/wilder-website-cinematic.mp4" type="video/mp4" />

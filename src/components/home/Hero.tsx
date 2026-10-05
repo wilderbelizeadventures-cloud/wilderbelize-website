@@ -67,19 +67,25 @@ export function Hero() {
     video.setAttribute("webkit-playsinline", "");
     video.setAttribute("x-webkit-airplay", "deny");
 
+    const isMobile = typeof window !== "undefined" && window.innerWidth < 768;
+
     const playVideo = () => {
-      if (!document.hidden) {
+      if (!document.hidden && video) {
         void video.play().catch(() => undefined);
       }
     };
 
-    playVideo();
+    const timer = setTimeout(() => {
+      playVideo();
+    }, isMobile ? 1800 : 300);
+
     video.addEventListener("loadeddata", () => setVideoLoaded(true));
     video.addEventListener("canplay", playVideo);
     document.addEventListener("visibilitychange", playVideo);
     window.addEventListener("pageshow", playVideo);
 
     return () => {
+      clearTimeout(timer);
       video.removeEventListener("canplay", playVideo);
       document.removeEventListener("visibilitychange", playVideo);
       window.removeEventListener("pageshow", playVideo);
@@ -108,7 +114,6 @@ export function Hero() {
             className={`hero-background-video pointer-events-none absolute inset-0 h-full w-full object-cover transition-opacity duration-1000 ${
               videoLoaded ? "opacity-100" : "opacity-0"
             }`}
-            autoPlay
             muted
             loop
             playsInline
