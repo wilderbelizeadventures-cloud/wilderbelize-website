@@ -16,6 +16,7 @@ const NAV = [
   { href: "/transfers", label: "Transfers" },
   { href: "/about", label: "About" },
   { href: "/travelers-info", label: "Travelers Info" },
+  { href: "/blogs", label: "Blog" },
   { href: "/contact", label: "Contact" },
 ];
 
@@ -38,7 +39,17 @@ export function Navbar() {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
-  const solid = scrolled;
+  // Pages that start with a dark hero where transparent white navbar is appropriate
+  const hasDarkHero =
+    pathname === "/" ||
+    pathname.startsWith("/tours") ||
+    pathname === "/transfers" ||
+    pathname === "/about" ||
+    pathname === "/travelers-info" ||
+    pathname === "/contact" ||
+    pathname === "/build-your-route";
+
+  const solid = scrolled || !hasDarkHero;
 
   return (
     <header className={cn("fixed inset-x-0 top-0 z-50 transition-all duration-300", solid ? "py-2" : "py-3 md:py-4")}>
@@ -46,7 +57,7 @@ export function Navbar() {
         <nav
           className={cn(
             "flex items-center justify-between rounded-2xl px-3 transition-all duration-300 md:px-5",
-            solid ? "glass py-2 shadow-soft" : "py-2",
+            solid ? "glass bg-white/90 py-2 shadow-soft ring-1 ring-ink/5 backdrop-blur-md" : "py-2",
           )}
         >
           {/* Logo */}

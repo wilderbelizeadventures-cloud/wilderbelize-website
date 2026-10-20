@@ -84,6 +84,7 @@ export function Footer() {
               <ul className="mt-4 space-y-2.5 text-sm">
                 <li><Link href="/about" className="transition hover:text-coral-300">About Us</Link></li>
                 <li><Link href="/travelers-info" className="transition hover:text-coral-300">Travelers Info</Link></li>
+                <li><Link href="/blogs" className="transition hover:text-coral-300">Blog & Stories</Link></li>
                 <li><Link href="/contact" className="transition hover:text-coral-300">Contact</Link></li>
                 <li><Link href="/contact#faq" className="transition hover:text-coral-300">FAQs</Link></li>
                 <li><Link href="/terms-and-conditions" className="transition hover:text-coral-300">Terms & Conditions</Link></li>
